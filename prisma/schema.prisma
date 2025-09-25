@@ -22,6 +22,8 @@ model User {
   addresses Address[]
   orders    Order[]
   reviews   Review[]
+  stores    Store[]
+  cartItems CartItem[]
 
   @@map("users")
 }
@@ -62,6 +64,7 @@ model Store {
   products Product[]
   orders   Order[]
   reviews  Review[]
+  coupons  Coupon[]
 
   @@map("stores")
 }

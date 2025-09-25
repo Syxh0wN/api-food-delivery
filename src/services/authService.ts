@@ -20,7 +20,7 @@ export class AuthService {
         email: data.email,
         password: hashedPassword,
         name: data.name,
-        phone: data.phone,
+        phone: data.phone || null,
         role: data.role || 'CLIENT'
       },
       select: {

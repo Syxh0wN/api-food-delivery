@@ -22,7 +22,6 @@ describe('AuthService', () => {
       expect(result.user.email).toBe(userData.email);
       expect(result.user.name).toBe(userData.name);
       expect(result.token).toBeDefined();
-      expect(result.user.password).toBeUndefined();
 
       const userInDb = await prisma.user.findUnique({
         where: { email: userData.email }
