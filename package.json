@@ -1,0 +1,39 @@
+{
+  "name": "api-myfood",
+  "version": "1.0.0",
+  "description": "API REST completa para sistema de delivery de comida. Marketplace que conecta clientes com lojas, desenvolvido em Node.js + TypeScript + Express + PostgreSQL.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx src/prisma/seed.ts"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "postgresql",
+    "delivery",
+    "food",
+    "marketplace",
+    "api",
+    "rest",
+    "prisma",
+    "jwt"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

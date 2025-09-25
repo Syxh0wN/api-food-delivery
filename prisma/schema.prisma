@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      UserRole @default(CLIENT)
+  avatar    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses Address[]
+  orders    Order[]
+  reviews   Review[]
+
+  @@map("users")
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  userId       String
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String
+  isDefault    Boolean @default(false)
+  createdAt    DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("addresses")
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  phone       String
+  email       String
+  isActive    Boolean  @default(true)
+  isApproved  Boolean  @default(false)
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    User       @relation(fields: [ownerId], references: [id])
+  products Product[]
+  orders   Order[]
+  reviews  Review[]
+
+  @@map("stores")
+}
+
+model Category {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  image       String?
+  isActive    Boolean @default(true)
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  price       Decimal @db.Decimal(10, 2)
+  image       String?
+  isActive    Boolean @default(true)
+  preparationTime Int? @default(30)
+  storeId     String
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store      Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  category   Category         @relation(fields: [categoryId], references: [id])
+  variations ProductVariation[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model ProductVariation {
+  id        String @id @default(cuid())
+  name      String
+  price     Decimal @db.Decimal(10, 2)
+  isActive  Boolean @default(true)
+  productId String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_variations")
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int    @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  userId       String
+  storeId      String
+  addressId    String
+  status       OrderStatus @default(PENDING)
+  total        Decimal     @db.Decimal(10, 2)
+  deliveryFee  Decimal     @db.Decimal(10, 2) @default(0)
+  subtotal     Decimal     @db.Decimal(10, 2)
+  paymentMethod String
+  paymentStatus String     @default("pending")
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id])
+  store     Store       @relation(fields: [storeId], references: [id])
+  address   Address     @relation(fields: [addressId], references: [id])
+  items     OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  notes     String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Coupon {
+  id            String     @id @default(cuid())
+  code          String     @unique
+  type          CouponType
+  value         Decimal    @db.Decimal(10, 2)
+  minOrderValue Decimal?   @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int        @default(0)
+  isActive      Boolean    @default(true)
+  validFrom     DateTime
+  validUntil    DateTime
+  storeId       String?
+  createdAt     DateTime   @default(now())
+
+  store Store? @relation(fields: [storeId], references: [id])
+
+  @@map("coupons")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  storeId   String
+  orderId   String?
+  rating    Int
+  comment   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+
+  @@map("reviews")
+}
+
+enum UserRole {
+  CLIENT
+  STORE_OWNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  FREE_DELIVERY
+}
