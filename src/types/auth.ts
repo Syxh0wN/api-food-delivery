@@ -13,8 +13,8 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
-  phone?: string;
-  role?: 'CLIENT' | 'STORE_OWNER';
+  phone?: string | undefined;
+  role?: 'CLIENT' | 'STORE_OWNER' | undefined;
 }
 
 export interface AuthResponse {
@@ -23,7 +23,7 @@ export interface AuthResponse {
     email: string;
     name: string;
     role: string;
-    avatar?: string;
+    avatar: string | null;
   };
   token: string;
 }

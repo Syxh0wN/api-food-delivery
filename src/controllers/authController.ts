@@ -35,7 +35,10 @@ export class AuthController {
         res.status(400).json({
           success: false,
           message: 'Dados inválidos',
-          errors: error.errors
+          errors: error.issues.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
         });
         return;
       }
@@ -63,7 +66,10 @@ export class AuthController {
         res.status(400).json({
           success: false,
           message: 'Dados inválidos',
-          errors: error.errors
+          errors: error.issues.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
         });
         return;
       }

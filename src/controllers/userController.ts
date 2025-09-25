@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
-import { AuthRequest } from '../types/auth';
+import { JwtPayload } from '../types/auth';
 import { z } from 'zod';
+
+interface AuthRequest extends Request {
+  user?: JwtPayload;
+}
 
 const userService = new UserService();
 
@@ -75,16 +79,16 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       data: { user }
     });
   } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Erro de validação',
-        errors: error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Erro de validação',
+          errors: error.issues.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        });
+      }
     
     res.status(400).json({
       success: false,
@@ -136,16 +140,16 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
       data: { address }
     });
   } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Erro de validação',
-        errors: error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Erro de validação',
+          errors: error.issues.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        });
+      }
     
     res.status(400).json({
       success: false,
@@ -174,16 +178,16 @@ export const updateAddress = async (req: AuthRequest, res: Response) => {
       data: { address }
     });
   } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Erro de validação',
-        errors: error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Erro de validação',
+          errors: error.issues.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        });
+      }
     
     res.status(404).json({
       success: false,
