@@ -33,6 +33,7 @@ model User {
   clientChatRooms ChatRoom[] @relation("ClientChatRooms")
   storeChatRooms ChatRoom[] @relation("StoreChatRooms")
   chatMessages ChatMessage[]
+  histories History[]
 
   @@map("users")
 }
@@ -451,5 +452,51 @@ enum SenderType {
 enum MessageType {
   TEXT
   IMAGE
+  SYSTEM
+}
+
+model History {
+  id          String       @id @default(cuid())
+  userId      String?
+  entityType  HistoryEntity
+  entityId    String
+  action      HistoryAction
+  description String
+  metadata    Json         @default("{}")
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime     @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("histories")
+}
+
+enum HistoryAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  VIEW
+  EXPORT
+  PAYMENT
+  STATUS_CHANGE
+  MESSAGE_SENT
+  REVIEW_CREATED
+  CACHE_INVALIDATED
+}
+
+enum HistoryEntity {
+  USER
+  STORE
+  PRODUCT
+  ORDER
+  CART
+  COUPON
+  REVIEW
+  CHAT_ROOM
+  CHAT_MESSAGE
+  CATEGORY
   SYSTEM
 }

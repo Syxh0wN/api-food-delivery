@@ -1,8 +1,9 @@
 import { prisma } from '../config/database';
 import { CreateOrderInput, UpdateOrderStatusInput, OrderResponse, OrderListResponse, OrderSummaryResponse } from '../types/order';
-import { OrderStatus, NotificationType } from '@prisma/client';
+import { OrderStatus, NotificationType, HistoryAction, HistoryEntity } from '@prisma/client';
 import { sendOrderNotification } from '../controllers/notificationController';
 import { chatService } from './chatService';
+import { HistoryHelper } from '../utils/historyHelper';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -412,6 +413,20 @@ export class OrderService {
         }
       }
     });
+
+    // Registrar histórico da mudança de status
+    await HistoryHelper.logOrderAction(
+      orderId,
+      HistoryAction.STATUS_CHANGE,
+      `Status do pedido alterado de ${order.status} para ${data.status}`,
+      undefined,
+      {
+        previousStatus: order.status,
+        newStatus: data.status,
+        notes: data.notes,
+        updatedBy: userId
+      }
+    );
 
     // Enviar mensagem do sistema sobre mudança de status
     try {

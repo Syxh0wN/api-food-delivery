@@ -1,6 +1,7 @@
 import { prisma } from '../config/database';
 import { CreateReviewInput, UpdateReviewInput, ReviewResponse, ReviewListResponse, ReviewStats, ReviewFilter } from '../types/review';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, HistoryAction, HistoryEntity } from '@prisma/client';
+import { HistoryHelper } from '../utils/historyHelper';
 
 export class ReviewService {
   async createReview(userId: string, input: CreateReviewInput): Promise<ReviewResponse> {
@@ -79,6 +80,20 @@ export class ReviewService {
     });
 
     await this.updateStoreRating(input.storeId);
+
+    // Registrar histórico da criação da avaliação
+    await HistoryHelper.logReviewAction(
+      review.id,
+      HistoryAction.REVIEW_CREATED,
+      `Avaliação criada para a loja ${store.name} com nota ${input.rating}`,
+      undefined,
+      {
+        storeId: input.storeId,
+        storeName: store.name,
+        rating: input.rating,
+        orderId: input.orderId
+      }
+    );
 
     return this.formatReviewResponse(review);
   }

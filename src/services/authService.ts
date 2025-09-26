@@ -2,6 +2,8 @@ import { prisma } from '../config/database';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { generateToken } from '../utils/jwt';
 import { LoginRequest, RegisterRequest, AuthResponse } from '../types/auth';
+import { HistoryHelper } from '../utils/historyHelper';
+import { HistoryAction, HistoryEntity } from '@prisma/client';
 
 export class AuthService {
   async register(data: RegisterRequest): Promise<AuthResponse> {
@@ -38,6 +40,14 @@ export class AuthService {
       role: user.role
     });
 
+    await HistoryHelper.logUserAction(
+      user.id,
+      HistoryAction.CREATE,
+      `Usuário registrado com sucesso`,
+      undefined,
+      { email: user.email, role: user.role }
+    );
+
     return {
       user,
       token
@@ -64,6 +74,14 @@ export class AuthService {
       email: user.email,
       role: user.role
     });
+
+    await HistoryHelper.logUserAction(
+      user.id,
+      HistoryAction.LOGIN,
+      `Usuário fez login com sucesso`,
+      undefined,
+      { email: user.email, role: user.role }
+    );
 
     return {
       user: {
