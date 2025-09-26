@@ -12,6 +12,7 @@ import orderRoutes from './routes/order';
 import couponRoutes from './routes/coupon';
 import paymentRoutes from './routes/payment';
 import notificationRoutes from './routes/notification';
+import uploadRoutes from './routes/upload';
 
 dotenv.config();
 
@@ -119,6 +120,7 @@ app.post('/api/webhook', async (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/uploads', uploadRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 

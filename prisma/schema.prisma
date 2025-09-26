@@ -29,6 +29,7 @@ model User {
   notifications Notification[]
   notificationHistory NotificationHistory[]
   notificationPreferences NotificationPreferences?
+  uploads Upload[]
 
   @@map("users")
 }
@@ -369,4 +370,32 @@ enum NotificationPriority {
   NORMAL
   HIGH
   URGENT
+}
+
+enum UploadFolder {
+  AVATARS
+  PRODUCTS
+  STORES
+  CATEGORIES
+  BANNERS
+  TEMP
+}
+
+model Upload {
+  id           String   @id @default(cuid())
+  userId       String
+  key          String   @unique
+  url          String
+  bucket       String
+  size         Int
+  mimeType     String
+  originalName String
+  folder       String
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("uploads")
 }
