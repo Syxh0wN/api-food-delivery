@@ -71,6 +71,8 @@ model Store {
   coverImage           String?
   isActive             Boolean  @default(true)
   isApproved           Boolean  @default(false)
+  averageRating        Float    @default(0)
+  totalReviews         Int      @default(0)
   ownerId              String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -176,6 +178,7 @@ model Order {
   items     OrderItem[]
   couponUsages CouponUsage[]
   chatRoom  ChatRoom?
+  reviews   Review[]
 
   @@map("orders")
 }
@@ -242,6 +245,7 @@ model Review {
 
   user  User  @relation(fields: [userId], references: [id])
   store Store @relation(fields: [storeId], references: [id])
+  order Order? @relation(fields: [orderId], references: [id])
 
   @@map("reviews")
 }

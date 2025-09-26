@@ -27,12 +27,16 @@ beforeEach(async () => {
     await prisma.order.deleteMany();
   }
   
+  // Limpar dados de review apenas se não for um teste de review
+  if (!expect.getState().testPath?.includes('review.test.ts')) {
+    await prisma.review.deleteMany();
+  }
+  
   // Sempre limpar outros dados
   await prisma.couponUsage.deleteMany();
   await prisma.coupon.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.productVariation.deleteMany();
-  await prisma.review.deleteMany();
 });
 
 afterAll(async () => {

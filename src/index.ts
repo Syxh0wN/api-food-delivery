@@ -14,6 +14,7 @@ import paymentRoutes from './routes/payment';
 import notificationRoutes from './routes/notification';
 import uploadRoutes from './routes/upload';
 import chatRoutes from './routes/chat';
+import reviewRoutes from './routes/review';
 import { initializeSocketService } from './services/socketService';
 
 dotenv.config();
@@ -124,6 +125,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 
