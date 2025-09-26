@@ -191,6 +191,8 @@ describe("UserService", () => {
 
       expect(defaultAddress?.id).toBe(address2.id);
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });

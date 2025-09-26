@@ -374,6 +374,8 @@ describe("ProductService", () => {
 
       expect(updatedProduct2.isAvailable).toBe(true);
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });

@@ -114,6 +114,8 @@ describe('AuthService', () => {
     it('should throw error for non-existent user', async () => {
       await expect(authService.getProfile('non-existent-id')).rejects.toThrow('Usuário não encontrado');
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });

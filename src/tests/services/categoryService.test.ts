@@ -1,5 +1,6 @@
 import { CategoryService } from "../../services/categoryService";
 import { CreateCategoryInput } from "../../types/product";
+import { prisma } from "../setup";
 
 describe("CategoryService", () => {
   let categoryService: CategoryService;
@@ -189,6 +190,8 @@ describe("CategoryService", () => {
         categoryService.deleteCategory("categoria-inexistente")
       ).rejects.toThrow("Categoria não encontrada");
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });

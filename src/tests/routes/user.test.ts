@@ -262,6 +262,8 @@ describe('User Routes', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.address.isDefault).toBe(true);
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });
