@@ -4,6 +4,7 @@ import { CategoryService } from '../services/categoryService';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { z } from 'zod';
 import { UpdateProductInput } from '../types/product';
+import { invalidateProductCache, invalidateCategoryCache } from '../middleware/cache';
 
 const productService = new ProductService();
 const categoryService = new CategoryService();
@@ -80,6 +81,8 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response): P
     }
     const validatedData = createProductSchema.parse(req.body);
     const product = await productService.createProduct(storeId, req.user.userId, validatedData);
+    
+    await invalidateProductCache();
     
     res.status(201).json({
       success: true,
@@ -200,6 +203,8 @@ export const updateProduct = async (req: AuthenticatedRequest, res: Response): P
     const validatedData = updateProductSchema.parse(req.body);
     const product = await productService.updateProduct(id!, storeId!, req.user!.userId, validatedData as UpdateProductInput);
     
+    await invalidateProductCache(id);
+    
     res.status(200).json({
       success: true,
       message: 'Produto atualizado com sucesso',
@@ -235,6 +240,8 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response): P
 
     const { storeId, id } = req.params;
     await productService.deleteProduct(id!, storeId!, req.user!.userId);
+    
+    await invalidateProductCache(id);
     
     res.status(200).json({
       success: true,
@@ -279,6 +286,8 @@ export const createCategory = async (req: AuthenticatedRequest, res: Response): 
   try {
     const validatedData = createCategorySchema.parse(req.body);
     const category = await categoryService.createCategory(validatedData);
+    
+    await invalidateCategoryCache();
     
     res.status(201).json({
       success: true,
@@ -351,6 +360,8 @@ export const updateCategory = async (req: AuthenticatedRequest, res: Response): 
     const validatedData = updateCategorySchema.parse(req.body);
     const category = await categoryService.updateCategory(id!, validatedData);
     
+    await invalidateCategoryCache();
+    
     res.status(200).json({
       success: true,
       message: 'Categoria atualizada com sucesso',
@@ -378,6 +389,8 @@ export const deleteCategory = async (req: AuthenticatedRequest, res: Response): 
   try {
     const { id } = req.params;
     await categoryService.deleteCategory(id!);
+    
+    await invalidateCategoryCache();
     
     res.status(200).json({
       success: true,

@@ -16,6 +16,7 @@ import uploadRoutes from './routes/upload';
 import chatRoutes from './routes/chat';
 import reviewRoutes from './routes/review';
 import { initializeSocketService } from './services/socketService';
+import { connectRedis } from './config/redis';
 
 dotenv.config();
 
@@ -139,10 +140,17 @@ app.use((req, res) => {
 let server: any;
 
 if (process.env.NODE_ENV !== 'test') {
-  server = app.listen(PORT, () => {
+  server = app.listen(PORT, async () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`API Base: http://localhost:${PORT}/api`);
+    
+    try {
+      await connectRedis();
+      console.log('🔥 Redis conectado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao conectar Redis:', error);
+    }
   });
   
   // Inicializar Socket.IO

@@ -66,6 +66,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
     "prisma": "^6.16.2",
+    "redis": "^5.8.2",
     "sharp": "^0.34.4",
     "socket.io": "^4.8.1",
     "stripe": "^18.5.0",

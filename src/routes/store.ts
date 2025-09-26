@@ -9,12 +9,13 @@ import {
   toggleStoreStatus
 } from '../controllers/storeController';
 import { authenticate, authorize } from '../middleware/auth';
+import { cacheStoreMiddleware } from '../middleware/cache';
 
 const router = Router();
 
 // Rotas públicas
-router.get('/stores', getAllStores);
-router.get('/stores/:id', getStoreById);
+router.get('/stores', cacheStoreMiddleware, getAllStores);
+router.get('/stores/:id', cacheStoreMiddleware, getStoreById);
 
 // Rotas para donos de loja
 router.post('/stores', authenticate, authorize(['STORE_OWNER']), createStore);

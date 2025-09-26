@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { StoreService } from '../services/storeService';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { z } from 'zod';
+import { invalidateStoreCache } from '../middleware/cache';
 
 const storeService = new StoreService();
 
@@ -59,6 +60,8 @@ export const createStore = async (req: AuthenticatedRequest, res: Response): Pro
 
     const validatedData = createStoreSchema.parse(req.body);
     const store = await storeService.createStore(req.user.userId, validatedData);
+    
+    await invalidateStoreCache();
     
     res.status(201).json({
       success: true,
@@ -171,6 +174,8 @@ export const updateStore = async (req: AuthenticatedRequest, res: Response): Pro
     const validatedData = updateStoreSchema.parse(req.body);
     const store = await storeService.updateStore(id, req.user!.userId, validatedData);
     
+    await invalidateStoreCache(id);
+    
     res.status(200).json({
       success: true,
       message: 'Loja atualizada com sucesso',
@@ -209,6 +214,8 @@ export const deleteStore = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
     await storeService.deleteStore(id, req.user!.userId);
+    
+    await invalidateStoreCache(id);
     
     res.status(200).json({
       success: true,

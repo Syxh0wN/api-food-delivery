@@ -15,16 +15,17 @@ import {
   deleteCategory
 } from '../controllers/productController';
 import { authenticate, authorize } from '../middleware/auth';
+import { cacheProductMiddleware, cacheCategoryMiddleware } from '../middleware/cache';
 
 const router = Router();
 
 // Rotas públicas
-router.get('/products', getAllProducts);
-router.get('/products/category/:categoryId', getProductsByCategory);
-router.get('/products/:id', getProductById);
-router.get('/stores/:storeId/products', getProductsByStore);
-router.get('/categories', getAllCategories);
-router.get('/categories/:id', getCategoryById);
+router.get('/products', cacheProductMiddleware, getAllProducts);
+router.get('/products/category/:categoryId', cacheProductMiddleware, getProductsByCategory);
+router.get('/products/:id', cacheProductMiddleware, getProductById);
+router.get('/stores/:storeId/products', cacheProductMiddleware, getProductsByStore);
+router.get('/categories', cacheCategoryMiddleware, getAllCategories);
+router.get('/categories/:id', cacheCategoryMiddleware, getCategoryById);
 
 // Rotas para donos de loja - gerenciar produtos
 router.post('/stores/:storeId/products', authenticate, authorize(['STORE_OWNER']), createProduct);
