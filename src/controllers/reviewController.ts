@@ -202,6 +202,19 @@ export const getStoreReviews = async (req: Request, res: Response) => {
       });
     }
 
+    // Verificar se a loja existe
+    const { prisma } = await import('../config/database');
+    const store = await prisma.store.findUnique({
+      where: { id: storeId }
+    });
+
+    if (!store) {
+      return res.status(400).json({
+        success: false,
+        message: 'Loja não encontrada'
+      });
+    }
+
     const result = await reviewService.getStoreReviews(storeId, limit, offset);
 
     return res.status(200).json({
@@ -258,6 +271,19 @@ export const getStoreStats = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'ID da loja é obrigatório'
+      });
+    }
+
+    // Verificar se a loja existe
+    const { prisma } = await import('../config/database');
+    const store = await prisma.store.findUnique({
+      where: { id: storeId }
+    });
+
+    if (!store) {
+      return res.status(400).json({
+        success: false,
+        message: 'Loja não encontrada'
       });
     }
 

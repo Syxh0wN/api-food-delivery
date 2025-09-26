@@ -115,9 +115,37 @@ describe('Review Routes', () => {
 
   describe('POST /api/reviews', () => {
     it('deve criar avaliação com sucesso', async () => {
+      // Criar pedido específico para este teste
+      const testAddress = await prisma.address.create({
+        data: {
+          userId: testUserId,
+          street: 'Test Street',
+          number: '123',
+          neighborhood: 'Test Neighborhood',
+          city: 'Test City',
+          state: 'Test State',
+          zipCode: '12345-678',
+          isDefault: true
+        }
+      });
+
+      const testOrder = await prisma.order.create({
+        data: {
+          userId: testUserId,
+          storeId: testStoreId,
+          addressId: testAddress.id,
+          status: OrderStatus.DELIVERED,
+          total: 50.0,
+          deliveryFee: 5.0,
+          subtotal: 45.0,
+          paymentMethod: 'credit_card',
+          paymentStatus: 'paid'
+        }
+      });
+
       const reviewData = {
         storeId: testStoreId,
-        orderId: testOrderId,
+        orderId: testOrder.id,
         rating: 5,
         comment: 'Excelente atendimento!'
       };
@@ -132,6 +160,10 @@ describe('Review Routes', () => {
       expect(response.body.data.review.rating).toBe(5);
       expect(response.body.data.review.comment).toBe('Excelente atendimento!');
       expect(response.body.data.review.storeId).toBe(testStoreId);
+
+      // Limpar dados específicos
+      await prisma.order.delete({ where: { id: testOrder.id } });
+      await prisma.address.delete({ where: { id: testAddress.id } });
     });
 
     it('deve falhar sem token de autenticação', async () => {
@@ -182,9 +214,52 @@ describe('Review Routes', () => {
     });
 
     it('deve falhar ao tentar avaliar a mesma loja duas vezes', async () => {
-      const reviewData = {
+      // Criar pedido específico para este teste
+      const testAddress = await prisma.address.create({
+        data: {
+          userId: testUserId,
+          street: 'Test Street',
+          number: '123',
+          neighborhood: 'Test Neighborhood',
+          city: 'Test City',
+          state: 'Test State',
+          zipCode: '12345-678',
+          isDefault: true
+        }
+      });
+
+      const testOrder = await prisma.order.create({
+        data: {
+          userId: testUserId,
+          storeId: testStoreId,
+          addressId: testAddress.id,
+          status: OrderStatus.DELIVERED,
+          total: 50.0,
+          deliveryFee: 5.0,
+          subtotal: 45.0,
+          paymentMethod: 'credit_card',
+          paymentStatus: 'paid'
+        }
+      });
+
+      // Primeira avaliação
+      const firstReviewData = {
         storeId: testStoreId,
-        orderId: testOrderId,
+        orderId: testOrder.id,
+        rating: 5,
+        comment: 'Primeira avaliação'
+      };
+
+      await request(app)
+        .post('/api/reviews')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(firstReviewData)
+        .expect(201);
+
+      // Segunda avaliação (deve falhar)
+      const secondReviewData = {
+        storeId: testStoreId,
+        orderId: testOrder.id,
         rating: 3,
         comment: 'Segunda avaliação'
       };
@@ -192,11 +267,15 @@ describe('Review Routes', () => {
       const response = await request(app)
         .post('/api/reviews')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(reviewData)
+        .send(secondReviewData)
         .expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Você já avaliou esta loja para este pedido');
+
+      // Limpar dados específicos
+      await prisma.order.delete({ where: { id: testOrder.id } });
+      await prisma.address.delete({ where: { id: testAddress.id } });
     });
   });
 
