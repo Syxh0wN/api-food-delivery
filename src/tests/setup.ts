@@ -18,13 +18,24 @@ beforeAll(async () => {
   }
 });
 
+beforeEach(async () => {
+  await prisma.couponUsage.deleteMany();
+  await prisma.coupon.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.productVariation.deleteMany();
+  await prisma.review.deleteMany();
+});
+
 afterAll(async () => {
   try {
     await prisma.$disconnect();
+    if (global.gc) {
+      global.gc();
+    }
   } catch (error) {
-    // Silent fail
   }
 });
-
 
 export { prisma };

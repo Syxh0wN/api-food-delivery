@@ -54,6 +54,26 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Test endpoint working' });
 });
 
+// Rotas públicas de cupons primeiro
+app.get('/api/coupons/active', async (req, res) => {
+  const { getActiveCoupons } = await import('./controllers/couponController');
+  getActiveCoupons(req, res);
+});
+app.get('/api/coupons/code/:code', async (req, res) => {
+  const { getCouponByCode } = await import('./controllers/couponController');
+  getCouponByCode(req, res);
+});
+
+// Rota de validação (qualquer usuário autenticado)
+app.post('/api/coupons/validate', async (req, res, next) => {
+  const { authenticate } = await import('./middleware/auth');
+  const { validateCoupon } = await import('./controllers/couponController');
+  authenticate(req, res, (err) => {
+    if (err) return next(err);
+    validateCoupon(req, res);
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', cartRoutes);
@@ -69,10 +89,15 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`API Base: http://localhost:${PORT}/api`);
-});
+let server: any;
+
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`API Base: http://localhost:${PORT}/api`);
+  });
+}
 
 export default app;
+export { server };

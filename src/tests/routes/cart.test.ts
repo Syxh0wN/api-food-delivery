@@ -10,18 +10,26 @@ describe('Cart Routes', () => {
   let testProductId: string;
 
   beforeAll(async () => {
-    // Criar usuário de teste
-    const { AuthService } = await import('../../services/authService');
-    const authService = new AuthService();
     const timestamp = Date.now();
-    const result = await authService.register({
-      email: `teste-carrinho-${timestamp}@teste.com`,
-      password: 'password123',
-      name: 'Usuário Teste Carrinho',
-      role: 'CLIENT'
+    
+    // Criar usuário de teste diretamente
+    const testUser = await prisma.user.create({
+      data: {
+        email: `teste-carrinho-${timestamp}@teste.com`,
+        password: 'hashedpassword',
+        name: 'Usuário Teste Carrinho',
+        role: 'CLIENT'
+      }
     });
-    testUserId = result.user.id;
-    authToken = result.token;
+    testUserId = testUser.id;
+
+    // Gerar token manualmente
+    const { generateToken } = await import('../../utils/jwt');
+    authToken = generateToken({
+      userId: testUser.id,
+      email: testUser.email,
+      role: testUser.role
+    });
 
     // Criar loja de teste
     const testStore = await prisma.store.create({
@@ -29,15 +37,15 @@ describe('Cart Routes', () => {
         name: 'Loja Teste Carrinho',
         description: 'Loja para testes de carrinho',
         phone: '11999999999',
-        email: `teste-carrinho-${timestamp}@teste.com`,
-        address: {
+        email: `loja-carrinho-${timestamp}@teste.com`,
+        address: JSON.stringify({
           street: 'Rua Teste',
           number: '123',
           neighborhood: 'Centro',
           city: 'São Paulo',
           state: 'SP',
           zipCode: '01234567'
-        },
+        }),
         deliveryRadius: 5,
         estimatedDeliveryTime: 30,
         minimumOrderValue: 20,
@@ -116,6 +124,17 @@ describe('Cart Routes', () => {
     });
 
     it('deve aumentar quantidade ao adicionar produto existente', async () => {
+      // Primeiro adicionar um item com quantidade 2
+      await request(app)
+        .post('/api/cart/items')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          productId: testProductId,
+          quantity: 2
+        })
+        .expect(201);
+
+      // Depois adicionar mais 1 para testar a soma
       const itemData = {
         productId: testProductId,
         quantity: 1
@@ -166,6 +185,16 @@ describe('Cart Routes', () => {
 
   describe('GET /api/cart/summary', () => {
     it('deve obter resumo do carrinho', async () => {
+      // Primeiro adicionar um item com quantidade 3
+      await request(app)
+        .post('/api/cart/items')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          productId: testProductId,
+          quantity: 3
+        })
+        .expect(201);
+
       const response = await request(app)
         .get('/api/cart/summary')
         .set('Authorization', `Bearer ${authToken}`)
@@ -181,12 +210,15 @@ describe('Cart Routes', () => {
   describe('PUT /api/cart/items/:itemId', () => {
     let cartItemId: string;
 
-    beforeAll(async () => {
-      const cartItems = await prisma.cartItem.findMany({
-        where: { userId: testUserId },
-        include: { product: true }
+    beforeEach(async () => {
+      const cartItem = await prisma.cartItem.create({
+        data: {
+          userId: testUserId,
+          productId: testProductId,
+          quantity: 2
+        }
       });
-      cartItemId = cartItems[0]?.id || '';
+      cartItemId = cartItem.id;
     });
 
     it('deve atualizar quantidade do item', async () => {
@@ -238,12 +270,15 @@ describe('Cart Routes', () => {
   describe('DELETE /api/cart/items/:itemId', () => {
     let cartItemId: string;
 
-    beforeAll(async () => {
-      const cartItems = await prisma.cartItem.findMany({
-        where: { userId: testUserId },
-        include: { product: true }
+    beforeEach(async () => {
+      const cartItem = await prisma.cartItem.create({
+        data: {
+          userId: testUserId,
+          productId: testProductId,
+          quantity: 2
+        }
       });
-      cartItemId = cartItems[0]?.id || '';
+      cartItemId = cartItem.id;
     });
 
     it('deve remover item do carrinho', async () => {
@@ -268,8 +303,7 @@ describe('Cart Routes', () => {
   });
 
   describe('DELETE /api/cart', () => {
-    beforeAll(async () => {
-      // Adicionar alguns itens para testar limpeza
+    beforeEach(async () => {
       await prisma.cartItem.create({
         data: {
           userId: testUserId,

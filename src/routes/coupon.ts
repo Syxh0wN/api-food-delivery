@@ -17,27 +17,16 @@ import {
 
 const router = Router();
 
-// Rotas públicas (para visualizar cupons ativos)
-router.get('/coupons/active', getActiveCoupons);
-router.get('/coupons/code/:code', getCouponByCode);
-
-// Validar cupom (qualquer usuário autenticado)
-router.post('/coupons/validate', authenticate, validateCoupon);
-
-// Rotas que requerem autenticação e autorização de dono de loja
-router.use(authenticate);
-router.use(authorize([UserRole.STORE_OWNER]));
-
 // CRUD de cupons globais (apenas donos de loja)
-router.post('/coupons', createCoupon);
-router.get('/coupons', getAllCoupons);
-router.get('/coupons/:id', getCouponById);
-router.put('/coupons/:id', updateCoupon);
-router.delete('/coupons/:id', deleteCoupon);
-router.get('/coupons/:id/usage', getCouponUsage);
+router.post('/coupons', authenticate, authorize([UserRole.STORE_OWNER]), createCoupon);
+router.get('/coupons', authenticate, authorize([UserRole.STORE_OWNER]), getAllCoupons);
+router.get('/coupons/:id', authenticate, authorize([UserRole.STORE_OWNER]), getCouponById);
+router.put('/coupons/:id', authenticate, authorize([UserRole.STORE_OWNER]), updateCoupon);
+router.delete('/coupons/:id', authenticate, authorize([UserRole.STORE_OWNER]), deleteCoupon);
+router.get('/coupons/:id/usage', authenticate, authorize([UserRole.STORE_OWNER]), getCouponUsage);
 
 // CRUD de cupons por loja
-router.post('/stores/:storeId/coupons', createStoreCoupon);
-router.get('/stores/:storeId/coupons', getStoreCoupons);
+router.post('/stores/:storeId/coupons', authenticate, authorize([UserRole.STORE_OWNER]), createStoreCoupon);
+router.get('/stores/:storeId/coupons', authenticate, authorize([UserRole.STORE_OWNER]), getStoreCoupons);
 
 export default router;

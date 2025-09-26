@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { CouponService } from '../services/couponService';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { z } from 'zod';
@@ -86,7 +86,7 @@ export const getAllCoupons = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
-export const getActiveCoupons = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getActiveCoupons = async (req: Request, res: Response): Promise<void> => {
   try {
     const storeId = req.query.storeId as string;
     const coupons = await couponService.getActiveCoupons(storeId);
@@ -121,7 +121,7 @@ export const getCouponById = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
-export const getCouponByCode = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getCouponByCode = async (req: Request, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     if (!code) {
