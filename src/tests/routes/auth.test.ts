@@ -2,6 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from '../../routes/auth';
+import { prisma } from '../setup';
 
 const app = express();
 app.use(cors());
@@ -126,6 +127,8 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Token inválido');
     });
+  });
+
   afterAll(async () => {
     await prisma.$disconnect();
   });
