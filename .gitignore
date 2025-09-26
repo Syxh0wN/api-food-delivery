@@ -33,3 +33,6 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+
+# Project documentation
+proximos-passos.txt
