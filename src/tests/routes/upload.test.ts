@@ -21,7 +21,7 @@ describe('Upload Routes', () => {
         password: 'hashedpassword',
         name: 'Test Upload User',
         phone: '11999999999',
-        role: UserRole.CLIENT
+        role: UserRole.STORE_OWNER
       }
     });
 
@@ -73,13 +73,22 @@ describe('Upload Routes', () => {
 
     testStoreId = testStore.id;
 
+    // Criar categoria para testes
+    const testCategory = await prisma.category.create({
+      data: {
+        name: 'Test Upload Category',
+        description: 'Category for upload tests',
+        image: 'test-category.jpg'
+      }
+    });
+
     // Criar produto para testes
     const testProduct = await prisma.product.create({
       data: {
         name: 'Test Upload Product',
         description: 'Product for upload tests',
         price: 25.0,
-        categoryId: 'test-category-id',
+        categoryId: testCategory.id,
         storeId: testStoreId,
         images: [],
         nutritionalInfo: {}
@@ -91,22 +100,35 @@ describe('Upload Routes', () => {
 
   afterAll(async () => {
     await prisma.upload.deleteMany({
-      where: { userId: { in: [testUserId, adminUserId] } }
+      where: { userId: { in: [testUserId, adminUserId].filter(Boolean) } }
     });
     await prisma.product.deleteMany({
       where: { storeId: testStoreId }
+    });
+    await prisma.category.deleteMany({
+      where: { name: 'Test Upload Category' }
     });
     await prisma.store.deleteMany({
       where: { ownerId: testUserId }
     });
     await prisma.user.deleteMany({
-      where: { id: { in: [testUserId, adminUserId] } }
+      where: { id: { in: [testUserId, adminUserId].filter(Boolean) } }
     });
   });
 
   // Helper para criar arquivo de teste
   const createTestFile = (filename: string, content: string = 'test content') => {
     return Buffer.from(content);
+  };
+
+  // Helper para criar arquivo de imagem de teste
+  const createTestImage = (filename: string) => {
+    // Criar um buffer que simula uma imagem JPEG
+    const jpegHeader = Buffer.from([
+      0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
+      0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xFF, 0xD9
+    ]);
+    return jpegHeader;
   };
 
   describe('POST /api/uploads/upload', () => {
@@ -271,10 +293,14 @@ describe('Upload Routes', () => {
 
     it('deve listar arquivos com filtros', async () => {
       const response = await request(app)
-        .get('/api/uploads/list?folder=temp&maxKeys=10')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .get('/api/uploads/list?folder=TEMP&maxKeys=10')
+        .set('Authorization', `Bearer ${authToken}`);
 
+      if (response.status !== 200) {
+        console.log('Erro na resposta:', response.body);
+      }
+
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.files).toBeDefined();
     });
@@ -288,13 +314,18 @@ describe('Upload Routes', () => {
 
   describe('POST /api/uploads/avatar', () => {
     it('deve fazer upload de avatar com sucesso', async () => {
-      const testImage = createTestFile('avatar.jpg', 'fake-image-data');
+      const testImage = createTestImage('avatar.jpg');
       
       const response = await request(app)
         .post('/api/uploads/avatar')
         .set('Authorization', `Bearer ${authToken}`)
-        .attach('avatar', testImage, 'avatar.jpg')
-        .expect(201);
+        .attach('avatar', testImage, 'avatar.jpg');
+
+      if (response.status !== 201) {
+        console.log('Erro no avatar:', response.body);
+      }
+
+      expect(response.status).toBe(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.upload).toBeDefined();
@@ -326,7 +357,7 @@ describe('Upload Routes', () => {
 
   describe('POST /api/uploads/product/:productId', () => {
     it('deve fazer upload de imagem de produto com sucesso', async () => {
-      const testImage = createTestFile('product.jpg', 'fake-image-data');
+      const testImage = createTestImage('product.jpg');
       
       const response = await request(app)
         .post(`/api/uploads/product/${testProductId}`)
@@ -365,7 +396,7 @@ describe('Upload Routes', () => {
   describe('POST /api/uploads/variants/:key', () => {
     it('deve gerar variantes de imagem com sucesso', async () => {
       // Primeiro, fazer upload de uma imagem
-      const testImage = createTestFile('test-image.jpg', 'fake-image-data');
+      const testImage = createTestImage('test-image.jpg');
       
       const uploadResponse = await request(app)
         .post('/api/uploads/upload')
@@ -378,9 +409,14 @@ describe('Upload Routes', () => {
 
       // Gerar variantes
       const response = await request(app)
-        .post(`/api/uploads/variants/${fileKey}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .post(`/api/uploads/variants/${encodeURIComponent(fileKey)}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      if (response.status !== 200) {
+        console.log('Erro nas variantes:', response.body);
+      }
+
+      expect(response.status).toBe(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.variants).toBeDefined();

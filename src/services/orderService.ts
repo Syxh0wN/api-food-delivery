@@ -2,6 +2,7 @@ import { prisma } from '../config/database';
 import { CreateOrderInput, UpdateOrderStatusInput, OrderResponse, OrderListResponse, OrderSummaryResponse } from '../types/order';
 import { OrderStatus, NotificationType } from '@prisma/client';
 import { sendOrderNotification } from '../controllers/notificationController';
+import { chatService } from './chatService';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -117,6 +118,24 @@ export class OrderService {
       total: Number(order.total),
       estimatedDeliveryTime: store.estimatedDeliveryTime
     });
+
+    // Criar sala de chat para o pedido
+    try {
+      await chatService.createChatRoom(order.id);
+      
+      // Enviar mensagem do sistema
+      await chatService.sendSystemMessage({
+        orderId: order.id,
+        type: 'ORDER_CREATED',
+        message: `Pedido #${order.id} foi criado com sucesso! Você pode acompanhar o status e se comunicar conosco através deste chat.`,
+        metadata: {
+          orderStatus: order.status,
+          total: Number(order.total)
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar sala de chat:', error);
+    }
 
     return {
       ...order,
@@ -393,6 +412,32 @@ export class OrderService {
         }
       }
     });
+
+    // Enviar mensagem do sistema sobre mudança de status
+    try {
+      const statusMessages = {
+        [OrderStatus.PREPARING]: 'Seu pedido está sendo preparado! 🍳',
+        [OrderStatus.READY]: 'Seu pedido está pronto para retirada! ✅',
+        [OrderStatus.DELIVERING]: 'Seu pedido saiu para entrega! 🚚',
+        [OrderStatus.DELIVERED]: 'Pedido entregue com sucesso! 🎉',
+        [OrderStatus.CANCELLED]: 'Pedido cancelado'
+      };
+
+      const message = statusMessages[data.status] || `Status do pedido atualizado para: ${data.status}`;
+      
+      await chatService.sendSystemMessage({
+        orderId,
+        type: 'ORDER_UPDATED',
+        message,
+        metadata: {
+          previousStatus: order.status,
+          newStatus: data.status,
+          notes: data.notes
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao enviar mensagem do sistema:', error);
+    }
 
     return {
       ...updatedOrder,

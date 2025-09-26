@@ -19,10 +19,17 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  // Limpar dados de chat apenas se não for um teste de chat
+  if (!expect.getState().testPath?.includes('chat.test.ts')) {
+    await prisma.chatMessage.deleteMany();
+    await prisma.chatRoom.deleteMany();
+    await prisma.orderItem.deleteMany();
+    await prisma.order.deleteMany();
+  }
+  
+  // Sempre limpar outros dados
   await prisma.couponUsage.deleteMany();
   await prisma.coupon.deleteMany();
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.productVariation.deleteMany();
   await prisma.review.deleteMany();

@@ -13,6 +13,8 @@ import couponRoutes from './routes/coupon';
 import paymentRoutes from './routes/payment';
 import notificationRoutes from './routes/notification';
 import uploadRoutes from './routes/upload';
+import chatRoutes from './routes/chat';
+import { initializeSocketService } from './services/socketService';
 
 dotenv.config();
 
@@ -121,6 +123,7 @@ app.post('/api/webhook', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 
@@ -139,6 +142,10 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`API Base: http://localhost:${PORT}/api`);
   });
+  
+  // Inicializar Socket.IO
+  initializeSocketService(server);
+  console.log('💬 Socket.IO inicializado');
 }
 
 export default app;

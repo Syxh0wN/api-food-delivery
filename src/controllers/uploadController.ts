@@ -24,7 +24,7 @@ const deleteFileSchema = z.object({
 const listFilesSchema = z.object({
   folder: z.nativeEnum(UploadFolder).optional(),
   prefix: z.string().optional(),
-  maxKeys: z.number().min(1).max(100).optional().default(50),
+  maxKeys: z.string().transform((val) => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default(50),
   continuationToken: z.string().optional()
 });
 

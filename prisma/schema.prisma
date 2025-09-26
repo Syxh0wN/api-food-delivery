@@ -30,6 +30,9 @@ model User {
   notificationHistory NotificationHistory[]
   notificationPreferences NotificationPreferences?
   uploads Upload[]
+  clientChatRooms ChatRoom[] @relation("ClientChatRooms")
+  storeChatRooms ChatRoom[] @relation("StoreChatRooms")
+  chatMessages ChatMessage[]
 
   @@map("users")
 }
@@ -172,6 +175,7 @@ model Order {
   address   Address     @relation(fields: [addressId], references: [id])
   items     OrderItem[]
   couponUsages CouponUsage[]
+  chatRoom  ChatRoom?
 
   @@map("orders")
 }
@@ -398,4 +402,50 @@ model Upload {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("uploads")
+}
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  clientId  String
+  storeId   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order  Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  client User         @relation("ClientChatRooms", fields: [clientId], references: [id], onDelete: Cascade)
+  store  User         @relation("StoreChatRooms", fields: [storeId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatMessage {
+  id          String      @id @default(cuid())
+  roomId      String
+  senderId    String
+  senderType  SenderType
+  message     String
+  messageType MessageType @default(TEXT)
+  isRead      Boolean     @default(false)
+  metadata    Json        @default("{}")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+enum SenderType {
+  CLIENT
+  STORE
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
 }
