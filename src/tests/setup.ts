@@ -13,9 +13,7 @@ const prisma = new PrismaClient({
 beforeAll(async () => {
   try {
     await prisma.$connect();
-    console.log("Database connected for tests");
   } catch (error) {
-    console.error("Database connection failed:", error);
     throw error;
   }
 });
@@ -24,7 +22,7 @@ afterAll(async () => {
   try {
     await prisma.$disconnect();
   } catch (error) {
-    console.warn("Database disconnection failed");
+    // Silent fail
   }
 });
 
