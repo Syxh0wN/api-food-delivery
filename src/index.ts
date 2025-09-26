@@ -10,6 +10,7 @@ import productRoutes from './routes/product';
 import cartRoutes from './routes/cart';
 import orderRoutes from './routes/order';
 import couponRoutes from './routes/coupon';
+import paymentRoutes from './routes/payment';
 
 dotenv.config();
 
@@ -74,11 +75,48 @@ app.post('/api/coupons/validate', async (req, res, next) => {
   });
 });
 
+app.post('/api/payment-intent', async (req, res, next) => {
+  const { authenticate } = await import('./middleware/auth');
+  const { createPaymentIntent } = await import('./controllers/paymentController');
+  authenticate(req, res, (err) => {
+    if (err) return next(err);
+    createPaymentIntent(req, res);
+  });
+});
+
+app.post('/api/confirm/:paymentIntentId', async (req, res, next) => {
+  const { authenticate } = await import('./middleware/auth');
+  const { confirmPayment } = await import('./controllers/paymentController');
+  authenticate(req, res, (err) => {
+    if (err) return next(err);
+    confirmPayment(req, res);
+  });
+});
+
+app.get('/api/status/:paymentIntentId', async (req, res, next) => {
+  const { authenticate } = await import('./middleware/auth');
+  const { getPaymentStatus } = await import('./controllers/paymentController');
+  authenticate(req, res, (err) => {
+    if (err) return next(err);
+    getPaymentStatus(req, res);
+  });
+});
+
+app.post('/api/refund', async (req, res, next) => {
+  const { authenticate } = await import('./middleware/auth');
+  const { createRefund } = await import('./controllers/paymentController');
+  authenticate(req, res, (err) => {
+    if (err) return next(err);
+    createRefund(req, res);
+  });
+});
+
+app.post('/api/webhook', async (req, res) => {
+  const { handleWebhook } = await import('./controllers/paymentController');
+  handleWebhook(req, res);
+});
+
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api', cartRoutes);
-app.use('/api', orderRoutes);
-app.use('/api', couponRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 
