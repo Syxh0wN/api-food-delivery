@@ -24,6 +24,7 @@ model User {
   reviews   Review[]
   stores    Store[]
   cartItems CartItem[]
+  couponUsages CouponUsage[]
 
   @@map("users")
 }
@@ -165,6 +166,7 @@ model Order {
   store     Store       @relation(fields: [storeId], references: [id])
   address   Address     @relation(fields: [addressId], references: [id])
   items     OrderItem[]
+  couponUsages CouponUsage[]
 
   @@map("orders")
 }
@@ -198,8 +200,24 @@ model Coupon {
   createdAt     DateTime   @default(now())
 
   store Store? @relation(fields: [storeId], references: [id])
+  usages CouponUsage[]
 
   @@map("coupons")
+}
+
+model CouponUsage {
+  id              String   @id @default(cuid())
+  couponId        String
+  userId          String
+  orderId         String
+  discountApplied Decimal  @db.Decimal(10, 2)
+  usedAt          DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  order  Order  @relation(fields: [orderId], references: [id])
+
+  @@map("coupon_usages")
 }
 
 model Review {
