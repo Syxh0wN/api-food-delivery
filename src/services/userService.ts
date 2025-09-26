@@ -1,5 +1,11 @@
-import { prisma } from '../config/database';
-import { UpdateUserInput, CreateAddressInput, UpdateAddressInput, UserResponse, AddressResponse } from '../types/user';
+import { prisma } from "../config/database";
+import {
+  UpdateUserInput,
+  CreateAddressInput,
+  UpdateAddressInput,
+  UserResponse,
+  AddressResponse,
+} from "../types/user";
 
 export class UserService {
   async getProfile(userId: string): Promise<UserResponse> {
@@ -14,24 +20,27 @@ export class UserService {
         avatar: true,
         isActive: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     if (!user) {
-      throw new Error('Usuário não encontrado');
+      throw new Error("Usuário não encontrado");
     }
 
     return user;
   }
 
-  async updateProfile(userId: string, data: UpdateUserInput): Promise<UserResponse> {
+  async updateProfile(
+    userId: string,
+    data: UpdateUserInput
+  ): Promise<UserResponse> {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
-      throw new Error('Usuário não encontrado');
+      throw new Error("Usuário não encontrado");
     }
 
     const updateData: any = {};
@@ -51,8 +60,8 @@ export class UserService {
         avatar: true,
         isActive: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     return updatedUser;
@@ -61,55 +70,76 @@ export class UserService {
   async getUserAddresses(userId: string): Promise<AddressResponse[]> {
     const addresses = await prisma.address.findMany({
       where: { userId },
-      orderBy: [
-        { isDefault: 'desc' },
-        { createdAt: 'desc' }
-      ]
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
     });
 
     return addresses as AddressResponse[];
   }
 
-  async createAddress(userId: string, data: CreateAddressInput): Promise<AddressResponse> {
+  async createAddress(
+    userId: string,
+    data: CreateAddressInput
+  ): Promise<AddressResponse> {
     if (data.isDefault) {
       await prisma.address.updateMany({
         where: { userId },
-        data: { isDefault: false }
+        data: { isDefault: false },
       });
     }
 
     const address = await prisma.address.create({
       data: {
-        ...data,
-        userId
-      }
+        street: data.street,
+        number: data.number,
+        complement: data.complement || null,
+        neighborhood: data.neighborhood,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
+        isDefault: data.isDefault || false,
+        userId,
+      },
     });
 
     return address as AddressResponse;
   }
 
-  async updateAddress(userId: string, addressId: string, data: UpdateAddressInput): Promise<AddressResponse> {
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    data: UpdateAddressInput
+  ): Promise<AddressResponse> {
     const address = await prisma.address.findFirst({
-      where: { 
+      where: {
         id: addressId,
-        userId 
-      }
+        userId,
+      },
     });
 
     if (!address) {
-      throw new Error('Endereço não encontrado');
+      throw new Error("Endereço não encontrado");
     }
 
     if (data.isDefault) {
       await prisma.address.updateMany({
         where: { userId },
-        data: { isDefault: false }
+        data: { isDefault: false },
       });
     }
 
+    const updateData: any = {};
+    if (data.street !== undefined) updateData.street = data.street;
+    if (data.number !== undefined) updateData.number = data.number;
+    if (data.complement !== undefined) updateData.complement = data.complement || null;
+    if (data.neighborhood !== undefined) updateData.neighborhood = data.neighborhood;
+    if (data.city !== undefined) updateData.city = data.city;
+    if (data.state !== undefined) updateData.state = data.state;
+    if (data.zipCode !== undefined) updateData.zipCode = data.zipCode;
+    if (data.isDefault !== undefined) updateData.isDefault = data.isDefault;
+
     const updatedAddress = await prisma.address.update({
       where: { id: addressId },
-      data
+      data: updateData,
     });
 
     return updatedAddress as AddressResponse;
@@ -117,41 +147,44 @@ export class UserService {
 
   async deleteAddress(userId: string, addressId: string): Promise<void> {
     const address = await prisma.address.findFirst({
-      where: { 
+      where: {
         id: addressId,
-        userId 
-      }
+        userId,
+      },
     });
 
     if (!address) {
-      throw new Error('Endereço não encontrado');
+      throw new Error("Endereço não encontrado");
     }
 
     await prisma.address.delete({
-      where: { id: addressId }
+      where: { id: addressId },
     });
   }
 
-  async setDefaultAddress(userId: string, addressId: string): Promise<AddressResponse> {
+  async setDefaultAddress(
+    userId: string,
+    addressId: string
+  ): Promise<AddressResponse> {
     const address = await prisma.address.findFirst({
-      where: { 
+      where: {
         id: addressId,
-        userId 
-      }
+        userId,
+      },
     });
 
     if (!address) {
-      throw new Error('Endereço não encontrado');
+      throw new Error("Endereço não encontrado");
     }
 
     await prisma.address.updateMany({
       where: { userId },
-      data: { isDefault: false }
+      data: { isDefault: false },
     });
 
     const updatedAddress = await prisma.address.update({
       where: { id: addressId },
-      data: { isDefault: true }
+      data: { isDefault: true },
     });
 
     return updatedAddress as AddressResponse;

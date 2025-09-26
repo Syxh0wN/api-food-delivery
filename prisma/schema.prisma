@@ -48,17 +48,23 @@ model Address {
 }
 
 model Store {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  image       String?
-  phone       String
-  email       String
-  isActive    Boolean  @default(true)
-  isApproved  Boolean  @default(false)
-  ownerId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  name                 String
+  description          String?
+  phone                String
+  email                String
+  address              Json
+  deliveryRadius       Float
+  estimatedDeliveryTime Int
+  minimumOrderValue    Float
+  isOpen               Boolean  @default(true)
+  logo                 String?
+  coverImage           String?
+  isActive             Boolean  @default(true)
+  isApproved           Boolean  @default(false)
+  ownerId              String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   owner    User       @relation(fields: [ownerId], references: [id])
   products Product[]
@@ -70,11 +76,13 @@ model Store {
 }
 
 model Category {
-  id          String @id @default(cuid())
-  name        String @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
   image       String?
-  isActive    Boolean @default(true)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   products Product[]
 
@@ -82,17 +90,25 @@ model Category {
 }
 
 model Product {
-  id          String  @id @default(cuid())
-  name        String
-  description String
-  price       Decimal @db.Decimal(10, 2)
-  image       String?
-  isActive    Boolean @default(true)
-  preparationTime Int? @default(30)
-  storeId     String
-  categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  price           Decimal  @db.Decimal(10, 2)
+  categoryId      String
+  storeId         String
+  isAvailable     Boolean  @default(true)
+  preparationTime Int?
+  ingredients     String[]
+  allergens       String[]
+  images          String[]
+  isVegetarian    Boolean  @default(false)
+  isVegan         Boolean  @default(false)
+  isGlutenFree    Boolean  @default(false)
+  nutritionalInfo Json
+  averageRating   Float    @default(0)
+  totalReviews    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   store      Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
   category   Category         @relation(fields: [categoryId], references: [id])

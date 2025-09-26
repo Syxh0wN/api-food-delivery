@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
+import storeRoutes from './routes/store';
+import productRoutes from './routes/product';
 
 dotenv.config();
 
@@ -44,10 +46,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test endpoint working' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', storeRoutes);
+app.use('/api', productRoutes);
 
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Rota ${req.originalUrl} não encontrada`
@@ -59,3 +68,5 @@ app.listen(PORT, () => {
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`API Base: http://localhost:${PORT}/api`);
 });
+
+export default app;

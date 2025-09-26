@@ -12,7 +12,7 @@ describe('Auth Routes', () => {
   describe('POST /api/auth/register', () => {
     it('should register a new user', async () => {
       const userData = {
-        email: 'test@example.com',
+        email: `test${Date.now()}@example.com`,
         password: 'password123',
         name: 'Test User',
         phone: '123456789'
@@ -85,12 +85,14 @@ describe('Auth Routes', () => {
 
   describe('GET /api/auth/profile', () => {
     let authToken: string;
+    let testEmail: string;
 
     beforeEach(async () => {
+      testEmail = `test${Date.now()}@example.com`;
       const response = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'test@example.com',
+          email: testEmail,
           password: 'password123',
           name: 'Test User'
         });
@@ -105,7 +107,7 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.email).toBe('test@example.com');
+      expect(response.body.data.email).toBe(testEmail);
     });
 
     it('should return error without token', async () => {
@@ -124,5 +126,6 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(401);
       expect(response.body.error).toBe('Token inválido');
     });
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
-});

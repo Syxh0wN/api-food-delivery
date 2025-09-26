@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import userRoutes from '../../routes/user';
 import { prisma } from '../setup';
+import { generateToken } from '../../utils/jwt';
+import { UserRole } from '@prisma/client';
 
 const app = express();
 app.use(cors());
@@ -12,30 +14,50 @@ app.use('/api/users', userRoutes);
 describe('User Routes', () => {
   let authToken: string;
   let userId: string;
+  let testEmail: string;
 
-  beforeEach(async () => {
+  const createTestUser = async () => {
+    testEmail = `test${Date.now()}@example.com`;
     const user = await prisma.user.create({
       data: {
-        email: 'test@example.com',
+        email: testEmail,
         password: 'hashedpassword',
         name: 'Test User',
-        phone: '123456789'
+        phone: '123456789',
+        role: UserRole.CLIENT
       }
     });
 
     userId = user.id;
-    authToken = 'valid-token-for-testing';
+    authToken = generateToken({ userId: user.id, email: user.email, role: user.role });
+    return user;
+  };
+
+  beforeEach(async () => {
+    // Limpar dados antes de cada teste em ordem correta
+    await prisma.orderItem.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.cartItem.deleteMany();
+    await prisma.review.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.coupon.deleteMany();
+    await prisma.store.deleteMany();
+    await prisma.category.deleteMany();
+    await prisma.address.deleteMany();
+    await prisma.user.deleteMany();
   });
 
   describe('GET /api/users/profile', () => {
     it('should get user profile', async () => {
+      await createTestUser();
+
       const response = await request(app)
         .get('/api/users/profile')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user.email).toBe('test@example.com');
+      expect(response.body.data.user.email).toBe(testEmail);
     });
 
     it('should return error without token', async () => {
@@ -49,9 +71,11 @@ describe('User Routes', () => {
 
   describe('PUT /api/users/profile', () => {
     it('should update user profile', async () => {
+      await createTestUser();
+
       const updateData = {
         name: 'Updated Name',
-        phone: '987654321'
+        phone: '11987654321'
       };
 
       const response = await request(app)
@@ -59,12 +83,15 @@ describe('User Routes', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateData);
 
+      
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user.name).toBe('Updated Name');
+      expect(response.body.data.user.phone).toBe('11987654321');
     });
 
     it('should return validation error for invalid data', async () => {
+      await createTestUser();
+
       const invalidData = {
         name: 'A',
         phone: '123'
@@ -83,6 +110,8 @@ describe('User Routes', () => {
 
   describe('GET /api/users/addresses', () => {
     it('should get user addresses', async () => {
+      await createTestUser();
+
       await prisma.address.create({
         data: {
           userId,
@@ -107,6 +136,8 @@ describe('User Routes', () => {
 
   describe('POST /api/users/addresses', () => {
     it('should create new address', async () => {
+      await createTestUser();
+
       const addressData = {
         street: 'Rua Nova',
         number: '456',
@@ -128,6 +159,8 @@ describe('User Routes', () => {
     });
 
     it('should return validation error for invalid data', async () => {
+      await createTestUser();
+
       const invalidData = {
         street: 'A',
         number: '',
@@ -150,6 +183,8 @@ describe('User Routes', () => {
 
   describe('PUT /api/users/addresses/:addressId', () => {
     it('should update address', async () => {
+      await createTestUser();
+
       const address = await prisma.address.create({
         data: {
           userId,
@@ -180,6 +215,8 @@ describe('User Routes', () => {
 
   describe('DELETE /api/users/addresses/:addressId', () => {
     it('should delete address', async () => {
+      await createTestUser();
+
       const address = await prisma.address.create({
         data: {
           userId,
@@ -203,6 +240,8 @@ describe('User Routes', () => {
 
   describe('PATCH /api/users/addresses/:addressId/default', () => {
     it('should set default address', async () => {
+      await createTestUser();
+
       const address = await prisma.address.create({
         data: {
           userId,
@@ -223,5 +262,6 @@ describe('User Routes', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.address.isDefault).toBe(true);
     });
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
-});

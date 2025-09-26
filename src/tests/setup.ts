@@ -1,18 +1,22 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_db'
-    }
-  }
+      url:
+        process.env.DATABASE_URL ||
+        "postgresql://postgres:password@localhost:5432/myfood_db",
+    },
+  },
 });
 
 beforeAll(async () => {
   try {
     await prisma.$connect();
+    console.log("Database connected for tests");
   } catch (error) {
-    console.warn('Database connection failed, running tests without database');
+    console.error("Database connection failed:", error);
+    throw error;
   }
 });
 
@@ -20,23 +24,9 @@ afterAll(async () => {
   try {
     await prisma.$disconnect();
   } catch (error) {
-    console.warn('Database disconnection failed');
+    console.warn("Database disconnection failed");
   }
 });
 
-beforeEach(async () => {
-  try {
-    await prisma.user.deleteMany();
-    await prisma.address.deleteMany();
-    await prisma.store.deleteMany();
-    await prisma.category.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.order.deleteMany();
-    await prisma.coupon.deleteMany();
-    await prisma.review.deleteMany();
-  } catch (error) {
-    console.warn('Database cleanup failed');
-  }
-});
 
 export { prisma };

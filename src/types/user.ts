@@ -1,31 +1,31 @@
 import { UserRole } from '@prisma/client';
 
 export interface UpdateUserInput {
-  name?: string;
-  phone?: string;
-  avatar?: string;
+  name?: string | undefined;
+  phone?: string | undefined;
+  avatar?: string | undefined;
 }
 
 export interface CreateAddressInput {
   street: string;
   number: string;
-  complement?: string;
+  complement?: string | undefined;
   neighborhood: string;
   city: string;
   state: string;
   zipCode: string;
-  isDefault?: boolean;
+  isDefault?: boolean | undefined;
 }
 
 export interface UpdateAddressInput {
-  street?: string;
-  number?: string;
-  complement?: string;
-  neighborhood?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  isDefault?: boolean;
+  street?: string | undefined;
+  number?: string | undefined;
+  complement?: string | undefined;
+  neighborhood?: string | undefined;
+  city?: string | undefined;
+  state?: string | undefined;
+  zipCode?: string | undefined;
+  isDefault?: boolean | undefined;
 }
 
 export interface UserResponse {

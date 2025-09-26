@@ -4,14 +4,24 @@ import { prisma } from '../setup';
 describe('AuthService', () => {
   let authService: AuthService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     authService = new AuthService();
+    await prisma.orderItem.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.cartItem.deleteMany();
+    await prisma.review.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.coupon.deleteMany();
+    await prisma.store.deleteMany();
+    await prisma.category.deleteMany();
+    await prisma.address.deleteMany();
+    await prisma.user.deleteMany();
   });
 
   describe('register', () => {
     it('should register a new user', async () => {
       const userData = {
-        email: 'test@example.com',
+        email: `test${Date.now()}@example.com`,
         password: 'password123',
         name: 'Test User',
         phone: '123456789'
@@ -33,7 +43,7 @@ describe('AuthService', () => {
 
     it('should throw error for existing email', async () => {
       const userData = {
-        email: 'test@example.com',
+        email: `test${Date.now() + 1}@example.com`,
         password: 'password123',
         name: 'Test User'
       };
@@ -45,9 +55,12 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
+    let testEmail: string;
+
     beforeEach(async () => {
+      testEmail = `test${Date.now() + 2}@example.com`;
       await authService.register({
-        email: 'test@example.com',
+        email: testEmail,
         password: 'password123',
         name: 'Test User'
       });
@@ -55,17 +68,17 @@ describe('AuthService', () => {
 
     it('should login with correct credentials', async () => {
       const result = await authService.login({
-        email: 'test@example.com',
+        email: testEmail,
         password: 'password123'
       });
 
-      expect(result.user.email).toBe('test@example.com');
+      expect(result.user.email).toBe(testEmail);
       expect(result.token).toBeDefined();
     });
 
     it('should throw error for incorrect password', async () => {
       await expect(authService.login({
-        email: 'test@example.com',
+        email: testEmail,
         password: 'wrongpassword'
       })).rejects.toThrow('Credenciais inválidas');
     });
@@ -101,5 +114,6 @@ describe('AuthService', () => {
     it('should throw error for non-existent user', async () => {
       await expect(authService.getProfile('non-existent-id')).rejects.toThrow('Usuário não encontrado');
     });
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
-});
