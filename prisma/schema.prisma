@@ -15,6 +15,7 @@ model User {
   phone     String?
   role      UserRole @default(CLIENT)
   avatar    String?
+  fcmToken  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -25,6 +26,9 @@ model User {
   stores    Store[]
   cartItems CartItem[]
   couponUsages CouponUsage[]
+  notifications Notification[]
+  notificationHistory NotificationHistory[]
+  notificationPreferences NotificationPreferences?
 
   @@map("users")
 }
@@ -257,4 +261,112 @@ enum CouponType {
   PERCENTAGE
   FIXED
   FREE_DELIVERY
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  channels    NotificationChannel[]
+  status      NotificationStatus @default(PENDING)
+  priority    NotificationPriority @default(NORMAL)
+  data        Json              @default("{}")
+  scheduledAt DateTime
+  sentAt      DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model NotificationHistory {
+  id           String            @id @default(cuid())
+  userId       String
+  type         NotificationType
+  channel      NotificationChannel
+  title        String
+  message      String
+  status       NotificationStatus
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_history")
+}
+
+model NotificationTemplate {
+  id           String            @id @default(cuid())
+  name         String
+  type         NotificationType  @unique
+  subject      String
+  title        String
+  message      String
+  htmlTemplate String?
+  textTemplate String?
+  variables    String[]
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("notification_templates")
+}
+
+model NotificationPreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  pushEnabled   Boolean  @default(true)
+  emailEnabled  Boolean  @default(true)
+  smsEnabled    Boolean  @default(false)
+  orderUpdates  Boolean  @default(true)
+  promotions    Boolean  @default(true)
+  systemAlerts  Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+enum NotificationType {
+  ORDER_CONFIRMED
+  ORDER_PREPARING
+  ORDER_READY
+  ORDER_OUT_FOR_DELIVERY
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  COUPON_AVAILABLE
+  PROMOTION
+  SYSTEM_ALERT
+  WELCOME
+  PASSWORD_RESET
+  ACCOUNT_VERIFICATION
+}
+
+enum NotificationChannel {
+  PUSH
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }

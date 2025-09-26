@@ -11,6 +11,7 @@ import cartRoutes from './routes/cart';
 import orderRoutes from './routes/order';
 import couponRoutes from './routes/coupon';
 import paymentRoutes from './routes/payment';
+import notificationRoutes from './routes/notification';
 
 dotenv.config();
 
@@ -117,6 +118,7 @@ app.post('/api/webhook', async (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 

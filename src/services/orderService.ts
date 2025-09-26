@@ -1,6 +1,7 @@
 import { prisma } from '../config/database';
 import { CreateOrderInput, UpdateOrderStatusInput, OrderResponse, OrderListResponse, OrderSummaryResponse } from '../types/order';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, NotificationType } from '@prisma/client';
+import { sendOrderNotification } from '../controllers/notificationController';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -108,6 +109,13 @@ export class OrderService {
 
     await prisma.cartItem.deleteMany({
       where: { userId }
+    });
+
+    // Enviar notificação de pedido confirmado
+    await sendOrderNotification(order.id, NotificationType.ORDER_CONFIRMED, {
+      storeName: store.name,
+      total: Number(order.total),
+      estimatedDeliveryTime: store.estimatedDeliveryTime
     });
 
     return {

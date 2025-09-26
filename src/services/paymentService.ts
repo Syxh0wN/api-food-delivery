@@ -7,6 +7,8 @@ import {
   RefundRequest,
   RefundResponse 
 } from '../types/payment';
+import { NotificationType } from '@prisma/client';
+import { sendOrderNotification } from '../controllers/notificationController';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_fake_key', {
   apiVersion: '2025-08-27.basil',
@@ -79,6 +81,9 @@ export class PaymentService {
           status: 'CONFIRMED'
         }
       });
+
+      // Enviar notificação de pagamento confirmado
+      await sendOrderNotification(orderId, NotificationType.PAYMENT_CONFIRMED);
 
       return true;
     }
