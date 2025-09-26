@@ -194,3 +194,4 @@ describe("UserService", () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});

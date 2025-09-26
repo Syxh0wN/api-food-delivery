@@ -129,3 +129,4 @@ describe('Auth Routes', () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});

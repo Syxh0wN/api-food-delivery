@@ -265,3 +265,4 @@ describe('User Routes', () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});

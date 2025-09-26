@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import storeRoutes from './routes/store';
 import productRoutes from './routes/product';
+import cartRoutes from './routes/cart';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', storeRoutes);
 app.use('/api', productRoutes);
+app.use('/api', cartRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

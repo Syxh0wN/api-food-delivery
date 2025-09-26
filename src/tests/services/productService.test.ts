@@ -377,3 +377,4 @@ describe("ProductService", () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});

@@ -192,3 +192,4 @@ describe("CategoryService", () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});

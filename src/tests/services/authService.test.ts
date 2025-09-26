@@ -117,3 +117,4 @@ describe('AuthService', () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
+});
