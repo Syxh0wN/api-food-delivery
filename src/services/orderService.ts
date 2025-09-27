@@ -4,7 +4,7 @@ import { OrderStatus, NotificationType, HistoryAction, HistoryEntity, DeliveryMe
 import { sendOrderNotification } from '../controllers/notificationController';
 import { chatService } from './chatService';
 import { HistoryHelper } from '../utils/historyHelper';
-import { DeliveryService } from './deliveryService';
+import { getDeliveryService } from './deliveryService';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -116,7 +116,7 @@ export class OrderService {
 
     // Criar rastreamento de entrega automaticamente
     try {
-      const deliveryService = new DeliveryService(prisma);
+      const deliveryService = getDeliveryService(prisma);
       const estimatedDeliveryTime = new Date();
       estimatedDeliveryTime.setMinutes(estimatedDeliveryTime.getMinutes() + store.estimatedDeliveryTime);
 

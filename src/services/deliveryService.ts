@@ -17,6 +17,7 @@ import {
 } from '../types/delivery';
 import { HistoryHelper } from '../utils/historyHelper';
 import { HistoryAction, HistoryEntity } from '@prisma/client';
+import { prisma } from '../config/database';
 
 export class DeliveryService {
   constructor(private prisma: PrismaClient) {}
@@ -558,3 +559,9 @@ export class DeliveryService {
     };
   }
 }
+
+export const deliveryService = new DeliveryService(prisma);
+
+export const getDeliveryService = (prismaInstance: PrismaClient) => {
+  return new DeliveryService(prismaInstance);
+};

@@ -14,6 +14,45 @@ describe('Melhorias no Sistema de Pedidos', () => {
   let storeOwnerToken: string;
   let adminToken: string;
 
+  // Helper function para criar dados de teste
+  const createTestOrder = async () => {
+    const testAddress = await prisma.address.create({
+      data: {
+        userId: testUser.id,
+        street: 'Test Street',
+        number: '123',
+        neighborhood: 'Test Neighborhood',
+        city: 'Test City',
+        state: 'TS',
+        zipCode: '12345-678',
+        isDefault: true
+      }
+    });
+
+    const testOrder = await prisma.order.create({
+      data: {
+        userId: testUser.id,
+        storeId: testStore.id,
+        addressId: testAddress.id,
+        status: OrderStatus.CONFIRMED,
+        total: 20.00,
+        subtotal: 15.00,
+        deliveryFee: 5.00,
+        paymentMethod: 'Credit Card',
+        paymentStatus: 'paid',
+        items: {
+          create: [{
+            productId: testProduct.id,
+            quantity: 1,
+            price: 15.00
+          }]
+        }
+      }
+    });
+
+    return { testOrder, testAddress };
+  };
+
   beforeAll(async () => {
     let existingUser = await prisma.user.findUnique({
       where: { email: 'test-delivery@example.com' }
@@ -268,9 +307,11 @@ describe('Melhorias no Sistema de Pedidos', () => {
 
   describe('POST /api/delivery/tracking', () => {
     it('deve criar rastreamento de entrega com sucesso', async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+
+      const { testOrder, testAddress } = await createTestOrder();
 
       const response = await request(app)
         .post('/api/delivery/tracking')
@@ -288,6 +329,13 @@ describe('Melhorias no Sistema de Pedidos', () => {
       expect(response.body.orderId).toBe(testOrder.id);
       expect(response.body.method).toBe(DeliveryMethod.DELIVERY);
       expect(response.body.trackingCode).toBeDefined();
+
+      // Limpar dados do teste
+      await prisma.deliveryTracking.deleteMany({
+        where: { orderId: testOrder.id }
+      });
+      await prisma.order.delete({ where: { id: testOrder.id } });
+      await prisma.address.delete({ where: { id: testAddress.id } });
     });
 
     it('deve falhar com dados inválidos', async () => {
@@ -318,9 +366,44 @@ describe('Melhorias no Sistema de Pedidos', () => {
     let trackingId: string;
 
     beforeEach(async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+      
+      // Criar endereço e pedido específicos para este teste
+      const testAddress = await prisma.address.create({
+        data: {
+          userId: testUser.id,
+          street: 'Test Street',
+          number: '123',
+          neighborhood: 'Test Neighborhood',
+          city: 'Test City',
+          state: 'TS',
+          zipCode: '12345-678',
+          isDefault: true
+        }
+      });
+
+      const testOrder = await prisma.order.create({
+        data: {
+          userId: testUser.id,
+          storeId: testStore.id,
+          addressId: testAddress.id,
+          status: OrderStatus.CONFIRMED,
+          total: 20.00,
+          subtotal: 15.00,
+          deliveryFee: 5.00,
+          paymentMethod: 'Credit Card',
+          paymentStatus: 'paid',
+          items: {
+            create: [{
+              productId: testProduct.id,
+              quantity: 1,
+              price: 15.00
+            }]
+          }
+        }
+      });
       
       const tracking = await prisma.deliveryTracking.create({
         data: {
@@ -378,10 +461,17 @@ describe('Melhorias no Sistema de Pedidos', () => {
   });
 
   describe('GET /api/delivery/tracking/order/:orderId', () => {
+    let testOrder: any;
+    let testAddress: any;
+
     beforeEach(async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+      
+      const orderData = await createTestOrder();
+      testOrder = orderData.testOrder;
+      testAddress = orderData.testAddress;
       
       await prisma.deliveryTracking.create({
         data: {
@@ -392,6 +482,16 @@ describe('Melhorias no Sistema de Pedidos', () => {
           locations: []
         }
       });
+    });
+
+    afterEach(async () => {
+      if (testOrder?.id) {
+        await prisma.deliveryTracking.deleteMany({
+          where: { orderId: testOrder.id }
+        });
+        await prisma.order.delete({ where: { id: testOrder.id } });
+        await prisma.address.delete({ where: { id: testAddress.id } });
+      }
     });
 
     it('deve buscar rastreamento do pedido com sucesso', async () => {
@@ -408,11 +508,29 @@ describe('Melhorias no Sistema de Pedidos', () => {
     });
 
     it('deve retornar erro para pedido sem rastreamento', async () => {
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
+      }
+
+      // Criar um pedido sem rastreamento
+      const testAddress = await prisma.address.create({
+        data: {
+          userId: testUser.id,
+          street: 'Test Street',
+          number: '123',
+          neighborhood: 'Test Neighborhood',
+          city: 'Test City',
+          state: 'TS',
+          zipCode: '12345-678',
+          isDefault: true
+        }
+      });
+
       const newOrder = await prisma.order.create({
         data: {
           userId: testUser.id,
           storeId: testStore.id,
-          addressId: testUser.addresses[0]?.id || 'test',
+          addressId: testAddress.id,
           status: OrderStatus.PENDING,
           total: 10.00,
           subtotal: 10.00,
@@ -428,15 +546,24 @@ describe('Melhorias no Sistema de Pedidos', () => {
 
       expect(response.status).toBe(500);
 
+      // Limpar dados do teste
       await prisma.order.delete({ where: { id: newOrder.id } });
+      await prisma.address.delete({ where: { id: testAddress.id } });
     });
   });
 
   describe('GET /api/delivery/tracking/code/:trackingCode', () => {
+    let testOrder: any;
+    let testAddress: any;
+
     beforeEach(async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+      
+      const orderData = await createTestOrder();
+      testOrder = orderData.testOrder;
+      testAddress = orderData.testAddress;
       
       await prisma.deliveryTracking.create({
         data: {
@@ -447,6 +574,16 @@ describe('Melhorias no Sistema de Pedidos', () => {
           locations: []
         }
       });
+    });
+
+    afterEach(async () => {
+      if (testOrder?.id) {
+        await prisma.deliveryTracking.deleteMany({
+          where: { orderId: testOrder.id }
+        });
+        await prisma.order.delete({ where: { id: testOrder.id } });
+        await prisma.address.delete({ where: { id: testAddress.id } });
+      }
     });
 
     it('deve buscar rastreamento por código com sucesso', async () => {
@@ -468,6 +605,12 @@ describe('Melhorias no Sistema de Pedidos', () => {
 
   describe('GET /api/delivery/estimate/:orderId', () => {
     it('deve calcular estimativa de entrega com sucesso', async () => {
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
+      }
+
+      const { testOrder, testAddress } = await createTestOrder();
+
       const response = await request(app)
         .get(`/api/delivery/estimate/${testOrder.id}`)
         .set('Authorization', `Bearer ${authToken}`);
@@ -477,6 +620,10 @@ describe('Melhorias no Sistema de Pedidos', () => {
       expect(response.body).toHaveProperty('estimatedTotalTime');
       expect(response.body).toHaveProperty('estimatedDeliveryDate');
       expect(response.body).toHaveProperty('factors');
+
+      // Limpar dados do teste
+      await prisma.order.delete({ where: { id: testOrder.id } });
+      await prisma.address.delete({ where: { id: testAddress.id } });
     });
 
     it('deve retornar erro para pedido inexistente', async () => {
@@ -572,10 +719,17 @@ describe('Melhorias no Sistema de Pedidos', () => {
   });
 
   describe('GET /api/delivery/stats', () => {
+    let testOrder: any;
+    let testAddress: any;
+
     beforeEach(async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+      
+      const orderData = await createTestOrder();
+      testOrder = orderData.testOrder;
+      testAddress = orderData.testAddress;
       
       await prisma.deliveryTracking.create({
         data: {
@@ -586,6 +740,16 @@ describe('Melhorias no Sistema de Pedidos', () => {
           locations: []
         }
       });
+    });
+
+    afterEach(async () => {
+      if (testOrder?.id) {
+        await prisma.deliveryTracking.deleteMany({
+          where: { orderId: testOrder.id }
+        });
+        await prisma.order.delete({ where: { id: testOrder.id } });
+        await prisma.address.delete({ where: { id: testAddress.id } });
+      }
     });
 
     it('deve buscar estatísticas com sucesso (apenas admin)', async () => {
@@ -631,10 +795,17 @@ describe('Melhorias no Sistema de Pedidos', () => {
   });
 
   describe('GET /api/delivery', () => {
+    let testOrder: any;
+    let testAddress: any;
+
     beforeEach(async () => {
-      if (!testOrder?.id) {
-        throw new Error('testOrder não foi criado');
+      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+        throw new Error('Dados de teste não foram criados corretamente');
       }
+      
+      const orderData = await createTestOrder();
+      testOrder = orderData.testOrder;
+      testAddress = orderData.testAddress;
       
       await prisma.deliveryTracking.create({
         data: {
@@ -645,6 +816,16 @@ describe('Melhorias no Sistema de Pedidos', () => {
           locations: []
         }
       });
+    });
+
+    afterEach(async () => {
+      if (testOrder?.id) {
+        await prisma.deliveryTracking.deleteMany({
+          where: { orderId: testOrder.id }
+        });
+        await prisma.order.delete({ where: { id: testOrder.id } });
+        await prisma.address.delete({ where: { id: testAddress.id } });
+      }
     });
 
     it('deve buscar entregas com sucesso', async () => {

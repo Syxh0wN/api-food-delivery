@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { DeliveryService } from '../services/deliveryService';
+import { getDeliveryService } from '../services/deliveryService';
 import { PrismaClient, DeliveryStatus, DeliveryMethod } from '@prisma/client';
 import { 
   CreateDeliveryTrackingInput, 
@@ -18,7 +18,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 const prisma = new PrismaClient();
-const deliveryService = new DeliveryService(prisma);
+const deliveryService = getDeliveryService(prisma);
 
 const createDeliveryTrackingSchema = z.object({
   orderId: z.string(),
