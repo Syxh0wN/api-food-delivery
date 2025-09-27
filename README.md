@@ -267,33 +267,46 @@ http://localhost:3010/api/docs
 - `GET /api/favorites/recommendations` - Recomendações
 - `GET /api/favorites/export` - Exportar favoritos
 
-#### Entrega
+#### Entrega e Motoboy
 - `POST /api/delivery/tracking` - Criar rastreamento
-- `GET /api/delivery/tracking/:orderId` - Obter rastreamento por pedido
-- `PATCH /api/delivery/tracking/:orderId` - Atualizar status de entrega
+- `PUT /api/delivery/tracking/:trackingId/status` - Atualizar status de entrega
+- `GET /api/delivery/tracking/order/:orderId` - Obter rastreamento por pedido
 - `GET /api/delivery/tracking/code/:trackingCode` - Obter rastreamento por código
-- `POST /api/delivery/estimate` - Calcular estimativa de entrega
-- `GET /api/delivery/stats` - Estatísticas de entrega
+- `GET /api/delivery/estimate/:orderId` - Calcular estimativa de entrega
+- `GET /api/delivery/stats` - Estatísticas de entrega (admin)
+- `GET /api/delivery/improvement-stats` - Estatísticas de melhoria (admin)
+- `GET /api/delivery` - Listar entregas
+- `POST /api/delivery/persons` - Criar entregador (admin)
+- `PUT /api/delivery/persons/:deliveryPersonId` - Atualizar entregador (admin)
+- `GET /api/delivery/persons` - Listar entregadores (admin)
 
 #### Usuários
 - `GET /api/users/profile` - Obter perfil do usuário
 - `PUT /api/users/profile` - Atualizar perfil
 - `GET /api/users/addresses` - Listar endereços
 - `POST /api/users/addresses` - Adicionar endereço
-- `PUT /api/users/addresses/:id` - Atualizar endereço
-- `DELETE /api/users/addresses/:id` - Excluir endereço
+- `PUT /api/users/addresses/:addressId` - Atualizar endereço
+- `DELETE /api/users/addresses/:addressId` - Excluir endereço
+- `PATCH /api/users/addresses/:addressId/default` - Definir endereço padrão
 
 #### Chat
-- `GET /api/chat/conversations` - Listar conversas
-- `POST /api/chat/conversations` - Criar conversa
-- `GET /api/chat/conversations/:id` - Obter conversa
-- `GET /api/chat/conversations/:id/messages` - Listar mensagens
-- `POST /api/chat/conversations/:id/messages` - Enviar mensagem
+- `POST /api/chat/rooms/:orderId` - Criar sala de chat para pedido
+- `POST /api/chat/messages` - Enviar mensagem
+- `GET /api/chat/rooms/:orderId/messages` - Obter histórico de mensagens
+- `PUT /api/chat/rooms/:orderId/read` - Marcar mensagens como lidas
+- `GET /api/chat/rooms` - Listar salas de chat do usuário
+- `GET /api/chat/rooms/:orderId` - Obter sala de chat específica
+- `GET /api/chat/stats` - Estatísticas de chat
+- `PUT /api/chat/rooms/:orderId/close` - Fechar sala de chat (apenas loja)
+- `POST /api/chat/system-messages` - Enviar mensagem do sistema (admin/loja)
 
 #### Notificações
-- `GET /api/notifications` - Listar notificações
-- `PUT /api/notifications/:id/read` - Marcar como lida
-- `PUT /api/notifications/read-all` - Marcar todas como lidas
+- `POST /api/notifications/send` - Enviar notificação (admin/loja)
+- `POST /api/notifications/send-bulk` - Enviar notificação em massa (admin)
+- `PUT /api/notifications/preferences` - Atualizar preferências de notificação
+- `PUT /api/notifications/fcm-token` - Atualizar token FCM
+- `GET /api/notifications/history` - Histórico de notificações
+- `GET /api/notifications/preferences` - Obter preferências de notificação
 
 #### Relatórios
 - `GET /api/reports/sales` - Relatório de vendas
@@ -309,14 +322,22 @@ http://localhost:3010/api/docs
 - `GET /api/history/export` - Exportar histórico
 
 #### Upload
-- `POST /api/uploads/image` - Upload de imagem
-- `DELETE /api/uploads/:id` - Excluir arquivo
+- `POST /api/uploads/upload` - Upload de arquivo único
+- `POST /api/uploads/upload-multiple` - Upload de múltiplos arquivos
+- `POST /api/uploads/presigned-url` - Gerar URL pré-assinada
+- `DELETE /api/uploads/delete` - Deletar arquivo
+- `GET /api/uploads/list` - Listar arquivos do usuário
+- `POST /api/uploads/variants/:key` - Gerar variantes de imagem
+- `POST /api/uploads/avatar` - Upload de avatar
+- `POST /api/uploads/product/:productId` - Upload de imagem de produto
+- `POST /api/uploads/store/:storeId` - Upload de imagem de loja
+- `POST /api/uploads/banner` - Upload de banner (admin)
 
 #### Pagamentos
 - `POST /api/payment-intent` - Criar intenção de pagamento
 - `POST /api/confirm/:paymentIntentId` - Confirmar pagamento
-- `GET /api/status/:paymentIntentId` - Status do pagamento
 - `POST /api/refund` - Criar reembolso
+- `GET /api/status/:paymentIntentId` - Status do pagamento
 - `POST /api/webhook` - Webhook de pagamento
 
 ### Autenticação
