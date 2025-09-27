@@ -224,6 +224,100 @@ http://localhost:3010/api/docs
 - `POST /api/orders` - Criar pedido
 - `GET /api/orders/:id` - Obter pedido
 - `PATCH /api/orders/:id/cancel` - Cancelar pedido
+- `GET /api/stores/:storeId/orders` - Listar pedidos da loja
+- `PATCH /api/stores/:storeId/orders/:id/status` - Atualizar status do pedido
+- `GET /api/stores/:storeId/orders/summary` - Resumo dos pedidos da loja
+
+#### Cupons
+- `GET /api/coupons/active` - Listar cupons ativos
+- `GET /api/coupons/code/:code` - Obter cupom por código
+- `POST /api/coupons/validate` - Validar cupom
+- `GET /api/coupons` - Listar todos os cupons
+- `POST /api/coupons` - Criar cupom
+- `GET /api/coupons/:id` - Obter cupom por ID
+- `PUT /api/coupons/:id` - Atualizar cupom
+- `DELETE /api/coupons/:id` - Excluir cupom
+- `GET /api/coupons/:id/usage` - Histórico de uso do cupom
+- `GET /api/stores/:storeId/coupons` - Listar cupons da loja
+- `POST /api/stores/:storeId/coupons` - Criar cupom para loja
+
+#### Avaliações
+- `GET /api/reviews` - Listar avaliações
+- `POST /api/reviews` - Criar avaliação
+- `GET /api/reviews/:id` - Obter avaliação por ID
+- `PUT /api/reviews/:id` - Atualizar avaliação
+- `DELETE /api/reviews/:id` - Excluir avaliação
+- `GET /api/stores/:storeId/reviews` - Listar avaliações da loja
+- `GET /api/stores/:storeId/reviews/summary` - Resumo das avaliações
+
+#### Favoritos
+- `GET /api/favorites` - Listar favoritos
+- `POST /api/favorites` - Adicionar favorito
+- `GET /api/favorites/:id` - Obter favorito por ID
+- `PUT /api/favorites/:id` - Atualizar favorito
+- `DELETE /api/favorites/:id` - Remover favorito
+- `POST /api/favorites/toggle/:type/:itemId` - Alternar favorito
+- `GET /api/favorites/status/:type/:itemId` - Verificar status de favorito
+- `GET /api/favorites/lists` - Listar listas de favoritos
+- `POST /api/favorites/lists` - Criar lista de favoritos
+- `GET /api/favorites/lists/:id` - Obter lista por ID
+- `PUT /api/favorites/lists/:id` - Atualizar lista
+- `DELETE /api/favorites/lists/:id` - Excluir lista
+- `GET /api/favorites/stats` - Estatísticas de favoritos
+- `GET /api/favorites/recommendations` - Recomendações
+- `GET /api/favorites/export` - Exportar favoritos
+
+#### Entrega
+- `POST /api/delivery/tracking` - Criar rastreamento
+- `GET /api/delivery/tracking/:orderId` - Obter rastreamento por pedido
+- `PATCH /api/delivery/tracking/:orderId` - Atualizar status de entrega
+- `GET /api/delivery/tracking/code/:trackingCode` - Obter rastreamento por código
+- `POST /api/delivery/estimate` - Calcular estimativa de entrega
+- `GET /api/delivery/stats` - Estatísticas de entrega
+
+#### Usuários
+- `GET /api/users/profile` - Obter perfil do usuário
+- `PUT /api/users/profile` - Atualizar perfil
+- `GET /api/users/addresses` - Listar endereços
+- `POST /api/users/addresses` - Adicionar endereço
+- `PUT /api/users/addresses/:id` - Atualizar endereço
+- `DELETE /api/users/addresses/:id` - Excluir endereço
+
+#### Chat
+- `GET /api/chat/conversations` - Listar conversas
+- `POST /api/chat/conversations` - Criar conversa
+- `GET /api/chat/conversations/:id` - Obter conversa
+- `GET /api/chat/conversations/:id/messages` - Listar mensagens
+- `POST /api/chat/conversations/:id/messages` - Enviar mensagem
+
+#### Notificações
+- `GET /api/notifications` - Listar notificações
+- `PUT /api/notifications/:id/read` - Marcar como lida
+- `PUT /api/notifications/read-all` - Marcar todas como lidas
+
+#### Relatórios
+- `GET /api/reports/sales` - Relatório de vendas
+- `GET /api/reports/orders` - Relatório de pedidos
+- `GET /api/reports/users` - Relatório de usuários
+- `GET /api/reports/stores` - Relatório de lojas
+- `GET /api/reports/products` - Relatório de produtos
+- `GET /api/reports/dashboard` - Dashboard de relatórios
+
+#### Histórico
+- `GET /api/history` - Listar histórico
+- `GET /api/history/:id` - Obter item do histórico
+- `GET /api/history/export` - Exportar histórico
+
+#### Upload
+- `POST /api/uploads/image` - Upload de imagem
+- `DELETE /api/uploads/:id` - Excluir arquivo
+
+#### Pagamentos
+- `POST /api/payment-intent` - Criar intenção de pagamento
+- `POST /api/confirm/:paymentIntentId` - Confirmar pagamento
+- `GET /api/status/:paymentIntentId` - Status do pagamento
+- `POST /api/refund` - Criar reembolso
+- `POST /api/webhook` - Webhook de pagamento
 
 ### Autenticação
 A API utiliza JWT para autenticação. Inclua o token no header:
