@@ -21,6 +21,7 @@ import deliveryRoutes from './routes/delivery';
 import favoriteRoutes from './routes/favorite';
 import { initializeSocketService } from './services/socketService';
 import { connectRedis } from './config/redis';
+import { serveSwaggerUI, serveSwaggerJSON, completeSwaggerDocument } from './docs';
 
 dotenv.config();
 
@@ -141,6 +142,10 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
+
+// Documentação Swagger
+app.get('/api/docs', serveSwaggerUI);
+app.get('/api/docs/swagger.json', serveSwaggerJSON);
 
 app.use((req, res) => {
   res.status(404).json({
