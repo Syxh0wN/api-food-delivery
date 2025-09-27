@@ -17,6 +17,7 @@ import chatRoutes from './routes/chat';
 import reviewRoutes from './routes/review';
 import reportRoutes from './routes/report';
 import historyRoutes from './routes/history';
+import deliveryRoutes from './routes/delivery';
 import { initializeSocketService } from './services/socketService';
 import { connectRedis } from './config/redis';
 
@@ -131,6 +132,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/delivery', deliveryRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 

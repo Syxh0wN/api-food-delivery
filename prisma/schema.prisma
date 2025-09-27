@@ -180,6 +180,7 @@ model Order {
   couponUsages CouponUsage[]
   chatRoom  ChatRoom?
   reviews   Review[]
+  deliveryTracking DeliveryTracking?
 
   @@map("orders")
 }
@@ -499,4 +500,61 @@ enum HistoryEntity {
   CHAT_MESSAGE
   CATEGORY
   SYSTEM
+}
+
+model DeliveryTracking {
+  id                    String        @id @default(cuid())
+  orderId               String        @unique
+  status                DeliveryStatus @default(PENDING)
+  method                DeliveryMethod
+  estimatedDeliveryTime DateTime?
+  actualDeliveryTime    DateTime?
+  deliveryPersonId      String?
+  deliveryPersonName    String?
+  deliveryPersonPhone   String?
+  trackingCode          String        @unique
+  locations             Json          @default("[]")
+  notes                 String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson DeliveryPerson? @relation(fields: [deliveryPersonId], references: [id])
+
+  @@map("delivery_tracking")
+}
+
+model DeliveryPerson {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  email           String   @unique
+  password        String
+  isActive        Boolean  @default(true)
+  currentLocation Json?
+  isAvailable     Boolean  @default(true)
+  totalDeliveries Int      @default(0)
+  averageRating   Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  deliveries DeliveryTracking[]
+
+  @@map("delivery_persons")
+}
+
+enum DeliveryStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED_DELIVERY
+  RETURNED
+}
+
+enum DeliveryMethod {
+  DELIVERY
+  PICKUP
 }

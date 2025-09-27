@@ -1,9 +1,10 @@
 import { prisma } from '../config/database';
 import { CreateOrderInput, UpdateOrderStatusInput, OrderResponse, OrderListResponse, OrderSummaryResponse } from '../types/order';
-import { OrderStatus, NotificationType, HistoryAction, HistoryEntity } from '@prisma/client';
+import { OrderStatus, NotificationType, HistoryAction, HistoryEntity, DeliveryMethod } from '@prisma/client';
 import { sendOrderNotification } from '../controllers/notificationController';
 import { chatService } from './chatService';
 import { HistoryHelper } from '../utils/historyHelper';
+import { DeliveryService } from './deliveryService';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -112,6 +113,21 @@ export class OrderService {
     await prisma.cartItem.deleteMany({
       where: { userId }
     });
+
+    // Criar rastreamento de entrega automaticamente
+    try {
+      const deliveryService = new DeliveryService(prisma);
+      const estimatedDeliveryTime = new Date();
+      estimatedDeliveryTime.setMinutes(estimatedDeliveryTime.getMinutes() + store.estimatedDeliveryTime);
+
+      await deliveryService.createDeliveryTracking({
+        orderId: order.id,
+        method: DeliveryMethod.DELIVERY,
+        estimatedDeliveryTime
+      });
+    } catch (error) {
+      console.error('Erro ao criar rastreamento de entrega:', error);
+    }
 
     // Enviar notificação de pedido confirmado
     await sendOrderNotification(order.id, NotificationType.ORDER_CONFIRMED, {
