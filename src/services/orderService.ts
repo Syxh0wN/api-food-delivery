@@ -449,12 +449,12 @@ export class OrderService {
       const statusMessages = {
         [OrderStatus.PREPARING]: 'Seu pedido está sendo preparado! 🍳',
         [OrderStatus.READY]: 'Seu pedido está pronto para retirada! ✅',
-        [OrderStatus.DELIVERING]: 'Seu pedido saiu para entrega! 🚚',
+        [OrderStatus.OUT_FOR_DELIVERY]: 'Seu pedido saiu para entrega! 🚚',
         [OrderStatus.DELIVERED]: 'Pedido entregue com sucesso! 🎉',
         [OrderStatus.CANCELLED]: 'Pedido cancelado'
       };
 
-      const message = statusMessages[data.status] || `Status do pedido atualizado para: ${data.status}`;
+      const message = statusMessages[data.status as keyof typeof statusMessages] || `Status do pedido atualizado para: ${data.status}`;
       
       await chatService.sendSystemMessage({
         orderId,

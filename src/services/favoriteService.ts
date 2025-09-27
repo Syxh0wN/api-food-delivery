@@ -616,8 +616,8 @@ export class FavoriteService {
     return {
       format,
       data: {
-        lists: lists.map(this.formatFavoriteList),
-        favorites: favorites.map(this.formatFavorite),
+        lists: lists.map((list: any) => this.formatFavoriteList(list)),
+        favorites: favorites.map((fav: any) => this.formatFavorite(fav)),
         metadata: {
           exportDate: new Date(),
           totalLists: lists.length,
@@ -737,7 +737,7 @@ export class FavoriteService {
       itemCount: list.itemCount,
       createdAt: list.createdAt,
       updatedAt: list.updatedAt,
-      favorites: list.favorites ? list.favorites.map(this.formatFavorite) : [],
+      favorites: list.favorites ? list.favorites.map((fav: any) => this.formatFavorite(fav)) : [],
       user: list.user
     };
   }

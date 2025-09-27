@@ -41,9 +41,12 @@ router.use(authenticate);
 // CRUD de Favoritos
 router.post('/', createFavorite);
 router.get('/', getFavorites);
-router.get('/:favoriteId', getFavoriteById);
-router.put('/:favoriteId', updateFavorite);
-router.delete('/:favoriteId', deleteFavorite);
+
+// Rotas específicas ANTES da rota genérica /:favoriteId
+router.get('/stats', getFavoriteStats);
+router.get('/recommendations', getRecommendations);
+router.get('/export', exportFavorites);
+router.get('/analytics', authorize([UserRole.ADMIN]), getFavoriteAnalytics);
 
 // Toggle favorito (adicionar/remover)
 router.post('/toggle/:type/:itemId', toggleFavorite);
@@ -60,22 +63,9 @@ router.get('/lists/:listId', getFavoriteListById);
 router.put('/lists/:listId', updateFavoriteList);
 router.delete('/lists/:listId', deleteFavoriteList);
 
-// ===== STATISTICS & ANALYTICS ROUTES =====
-
-// Estatísticas (públicas para usuários logados)
-router.get('/stats', getFavoriteStats);
-
-// Análises (apenas admin)
-router.get('/analytics', authorize([UserRole.ADMIN]), getFavoriteAnalytics);
-
-// ===== RECOMMENDATIONS ROUTES =====
-
-// Recomendações baseadas em favoritos
-router.get('/recommendations', getRecommendations);
-
-// ===== EXPORT ROUTES =====
-
-// Exportar favoritos
-router.get('/export', exportFavorites);
+// Rotas genéricas por último
+router.get('/:favoriteId', getFavoriteById);
+router.put('/:favoriteId', updateFavorite);
+router.delete('/:favoriteId', deleteFavorite);
 
 export default router;

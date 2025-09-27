@@ -311,35 +311,40 @@ describe('Sistema de Favoritos', () => {
           type: FavoriteType.STORE
         });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty('message', 'Erro interno do servidor');
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message', 'Dados inválidos');
     });
   });
 
   describe('GET /api/favorites', () => {
-    beforeEach(async () => {
-      if (!testUser?.id || !testStore?.id || !testProduct?.id) {
-        throw new Error('Dados de teste não foram criados corretamente');
-      }
+  beforeEach(async () => {
+    if (!testUser?.id || !testStore?.id || !testProduct?.id) {
+      throw new Error('Dados de teste não foram criados corretamente');
+    }
 
-      // Criar alguns favoritos para teste
-      await prisma.favorite.createMany({
-        data: [
-          {
-            userId: testUser.id,
-            itemId: testStore.id,
-            type: FavoriteType.STORE,
-            notes: 'Loja favorita'
-          },
-          {
-            userId: testUser.id,
-            itemId: testProduct.id,
-            type: FavoriteType.PRODUCT,
-            tags: ['teste']
-          }
-        ]
-      });
+    // Limpar favoritos existentes antes de cada teste
+    await prisma.favorite.deleteMany({
+      where: { userId: testUser.id }
     });
+
+    // Criar alguns favoritos para teste
+    await prisma.favorite.createMany({
+      data: [
+        {
+          userId: testUser.id,
+          itemId: testStore.id,
+          type: FavoriteType.STORE,
+          notes: 'Loja favorita'
+        },
+        {
+          userId: testUser.id,
+          itemId: testProduct.id,
+          type: FavoriteType.PRODUCT,
+          tags: ['teste']
+        }
+      ]
+    });
+  });
 
     afterEach(async () => {
       if (testUser?.id) {
@@ -443,6 +448,11 @@ describe('Sistema de Favoritos', () => {
       if (!testUser?.id) {
         throw new Error('Dados de teste não foram criados corretamente');
       }
+
+      // Limpar listas existentes
+      await prisma.favoriteList.deleteMany({
+        where: { userId: testUser.id }
+      });
 
       testList = await prisma.favoriteList.create({
         data: {
@@ -582,6 +592,11 @@ describe('Sistema de Favoritos', () => {
         throw new Error('Dados de teste não foram criados corretamente');
       }
 
+      // Limpar favoritos existentes
+      await prisma.favorite.deleteMany({
+        where: { userId: testUser.id }
+      });
+
       // Criar alguns favoritos para estatísticas
       await prisma.favorite.createMany({
         data: [
@@ -626,6 +641,11 @@ describe('Sistema de Favoritos', () => {
         throw new Error('Dados de teste não foram criados corretamente');
       }
 
+      // Limpar favoritos existentes
+      await prisma.favorite.deleteMany({
+        where: { userId: testUser.id }
+      });
+
       // Criar favorito para gerar recomendações
       await prisma.favorite.create({
         data: {
@@ -668,6 +688,14 @@ describe('Sistema de Favoritos', () => {
       if (!testUser?.id || !testStore?.id) {
         throw new Error('Dados de teste não foram criados corretamente');
       }
+
+      // Limpar dados existentes
+      await prisma.favorite.deleteMany({
+        where: { userId: testUser.id }
+      });
+      await prisma.favoriteList.deleteMany({
+        where: { userId: testUser.id }
+      });
 
       // Criar dados para exportação
       const list = await prisma.favoriteList.create({
@@ -753,19 +781,22 @@ describe('Sistema de Favoritos', () => {
 
     it('deve falhar ao atualizar favorito de outro usuário', async () => {
       // Criar outro usuário
-      const otherUser = await prisma.user.create({
-        data: {
-          email: 'other-user@example.com',
-          password: await hashPassword('password123'),
-          name: 'Other User',
-          role: UserRole.CLIENT
-        }
-      });
+      let otherUser = await prisma.user.findUnique({ where: { email: 'other-user-favorites@example.com' } });
+      if (!otherUser) {
+        otherUser = await prisma.user.create({
+          data: {
+            email: 'other-user-favorites@example.com',
+            password: await hashPassword('password123'),
+            name: 'Other User Favorites',
+            role: UserRole.CLIENT
+          }
+        });
+      }
 
       const otherUserToken = (await request(app)
         .post('/api/auth/login')
         .send({
-          email: 'other-user@example.com',
+          email: 'other-user-favorites@example.com',
           password: 'password123'
         })).body.data.token;
 
