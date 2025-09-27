@@ -286,6 +286,49 @@ npm start
 - Documente endpoints no Swagger
 - Use commits semânticos
 
+## Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+npm run dev          # Inicia servidor em modo desenvolvimento
+npm run build        # Compila TypeScript para JavaScript
+npm start           # Inicia servidor em modo produção
+
+# Testes
+npm test            # Executa todos os testes
+npm run test:watch  # Executa testes em modo watch
+npm run test:coverage # Executa testes com relatório de cobertura
+npm run test:ci     # Executa testes para CI/CD
+
+# Qualidade de Código
+npm run lint        # Verifica problemas de linting
+npm run lint:fix    # Corrige problemas de linting automaticamente
+npm run format      # Formata código com Prettier
+
+# Banco de Dados
+npm run db:generate # Gera cliente Prisma
+npm run db:push     # Sincroniza schema com banco
+npm run db:migrate  # Executa migrações
+npm run db:studio   # Abre Prisma Studio
+npm run db:seed     # Popula banco com dados de exemplo
+```
+
+## Variáveis de Ambiente
+
+O projeto utiliza as seguintes variáveis de ambiente (veja `env.example`):
+
+### Obrigatórias
+- `DATABASE_URL` - URL de conexão com PostgreSQL
+- `JWT_SECRET` - Chave secreta para JWT
+- `PORT` - Porta do servidor (padrão: 3010)
+
+### Opcionais
+- `REDIS_URL` - URL do Redis para cache
+- `AWS_*` - Configurações AWS S3 para upload de imagens
+- `SMTP_*` - Configurações de email
+- `FIREBASE_*` - Configurações Firebase para notificações
+- `STRIPE_*` - Configurações Stripe para pagamentos
+
 ## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
