@@ -52,7 +52,7 @@ export const getProfile = async (
       return;
     }
 
-    const user = await userService.getProfile(req.user.userId);
+    const user = await userService.getProfile(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -82,7 +82,7 @@ export const updateProfile = async (
 
     const validatedData = updateProfileSchema.parse(req.body);
     const user = await userService.updateProfile(
-      req.user.userId,
+      req.user.id,
       validatedData
     );
 
@@ -123,7 +123,7 @@ export const getUserAddresses = async (
       return;
     }
 
-    const addresses = await userService.getUserAddresses(req.user.userId);
+    const addresses = await userService.getUserAddresses(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -154,7 +154,7 @@ export const createAddress = async (
 
     const validatedData = createAddressSchema.parse(req.body);
     const address = await userService.createAddress(
-      req.user.userId,
+      req.user.id,
       validatedData
     );
 
@@ -205,7 +205,7 @@ export const updateAddress = async (
     const validatedData = updateAddressSchema.parse(req.body);
 
     const address = await userService.updateAddress(
-      req.user.userId,
+      req.user.id,
       addressId,
       validatedData
     );
@@ -249,7 +249,7 @@ export const deleteAddress = async (req: AuthenticatedRequest, res: Response): P
       res.status(400).json({ success: false, message: 'ID do endereço é obrigatório' });
       return;
     }
-    await userService.deleteAddress(req.user.userId, addressId);
+    await userService.deleteAddress(req.user.id, addressId);
     
     res.status(200).json({
       success: true,
@@ -284,7 +284,7 @@ export const setDefaultAddress = async (
       return;
     }
     const address = await userService.setDefaultAddress(
-      req.user.userId,
+      req.user.id,
       addressId
     );
 

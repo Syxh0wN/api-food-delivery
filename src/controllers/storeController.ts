@@ -59,7 +59,7 @@ export const createStore = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     const validatedData = createStoreSchema.parse(req.body);
-    const store = await storeService.createStore(req.user.userId, validatedData);
+    const store = await storeService.createStore(req.user.id, validatedData);
     
     await invalidateStoreCache();
     
@@ -125,7 +125,7 @@ export const getMyStores = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    const stores = await storeService.getStoresByOwner(req.user.userId);
+    const stores = await storeService.getStoresByOwner(req.user.id);
     
     res.status(200).json({
       success: true,
@@ -172,7 +172,7 @@ export const updateStore = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
     const validatedData = updateStoreSchema.parse(req.body);
-    const store = await storeService.updateStore(id, req.user!.userId, validatedData);
+    const store = await storeService.updateStore(id, req.user!.id, validatedData);
     
     await invalidateStoreCache(id);
     
@@ -213,7 +213,7 @@ export const deleteStore = async (req: AuthenticatedRequest, res: Response): Pro
       res.status(400).json({ success: false, message: 'ID da loja é obrigatório' });
       return;
     }
-    await storeService.deleteStore(id, req.user!.userId);
+    await storeService.deleteStore(id, req.user!.id);
     
     await invalidateStoreCache(id);
     
@@ -243,7 +243,7 @@ export const toggleStoreStatus = async (req: AuthenticatedRequest, res: Response
       res.status(400).json({ success: false, message: 'ID da loja é obrigatório' });
       return;
     }
-    const store = await storeService.toggleStoreStatus(id, req.user!.userId);
+    const store = await storeService.toggleStoreStatus(id, req.user!.id);
     
     res.status(200).json({
       success: true,

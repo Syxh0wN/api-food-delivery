@@ -91,7 +91,7 @@ export class AuthController {
         return;
       }
 
-        const profile = await authService.getProfile(req.user.userId);
+        const profile = await authService.getProfile(req.user.id);
       
       res.json({
         success: true,

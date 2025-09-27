@@ -34,6 +34,8 @@ model User {
   storeChatRooms ChatRoom[] @relation("StoreChatRooms")
   chatMessages ChatMessage[]
   histories History[]
+  favorites Favorite[]
+  favoriteLists FavoriteList[]
 
   @@map("users")
 }
@@ -500,6 +502,8 @@ enum HistoryEntity {
   CHAT_MESSAGE
   CATEGORY
   SYSTEM
+  FAVORITE
+  FAVORITE_LIST
 }
 
 model DeliveryTracking {
@@ -557,4 +561,46 @@ enum DeliveryStatus {
 enum DeliveryMethod {
   DELIVERY
   PICKUP
+}
+
+enum FavoriteType {
+  STORE
+  PRODUCT
+}
+
+model Favorite {
+  id        String       @id @default(cuid())
+  userId    String
+  itemId    String
+  type      FavoriteType
+  listId    String?
+  notes     String?
+  tags      String[]     @default([])
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list FavoriteList? @relation(fields: [listId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, itemId, type])
+  @@map("favorites")
+}
+
+model FavoriteList {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean   @default(false)
+  tags        String[]  @default([])
+  color       String?
+  itemCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites Favorite[]
+
+  @@map("favorite_lists")
 }

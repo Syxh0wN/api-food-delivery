@@ -80,7 +80,7 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response): P
       return;
     }
     const validatedData = createProductSchema.parse(req.body);
-    const product = await productService.createProduct(storeId, req.user.userId, validatedData);
+    const product = await productService.createProduct(storeId, req.user.id, validatedData);
     
     await invalidateProductCache();
     
@@ -201,7 +201,7 @@ export const updateProduct = async (req: AuthenticatedRequest, res: Response): P
 
     const { storeId, id } = req.params;
     const validatedData = updateProductSchema.parse(req.body);
-    const product = await productService.updateProduct(id!, storeId!, req.user!.userId, validatedData as UpdateProductInput);
+    const product = await productService.updateProduct(id!, storeId!, req.user!.id, validatedData as UpdateProductInput);
     
     await invalidateProductCache(id);
     
@@ -239,7 +239,7 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response): P
     }
 
     const { storeId, id } = req.params;
-    await productService.deleteProduct(id!, storeId!, req.user!.userId);
+    await productService.deleteProduct(id!, storeId!, req.user!.id);
     
     await invalidateProductCache(id);
     
@@ -266,7 +266,7 @@ export const toggleProductAvailability = async (req: AuthenticatedRequest, res: 
     }
 
     const { storeId, id } = req.params;
-    const product = await productService.toggleProductAvailability(id!, storeId!, req.user!.userId);
+    const product = await productService.toggleProductAvailability(id!, storeId!, req.user!.id);
     
     res.status(200).json({
       success: true,

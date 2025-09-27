@@ -71,7 +71,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response): Pro
 
     const validatedData = createMessageSchema.parse(req.body);
     
-    const message = await chatService.sendMessage(req.user.userId, validatedData);
+    const message = await chatService.sendMessage(req.user.id, validatedData);
     
     res.status(201).json({ 
       success: true, 
@@ -118,7 +118,7 @@ export const getChatHistory = async (req: AuthenticatedRequest, res: Response): 
 
     const chatHistory = await chatService.getChatHistory(
       orderId, 
-      req.user.userId, 
+      req.user.id, 
       validatedData.limit, 
       validatedData.offset
     );
@@ -163,7 +163,7 @@ export const markMessagesAsRead = async (req: AuthenticatedRequest, res: Respons
       return;
     }
 
-    await chatService.markMessagesAsRead(orderId, req.user.userId);
+    await chatService.markMessagesAsRead(orderId, req.user.id);
     
     res.status(200).json({ 
       success: true, 
@@ -186,7 +186,7 @@ export const getChatRooms = async (req: AuthenticatedRequest, res: Response): Pr
 
     const validatedData = chatRoomsSchema.parse(req.query);
     
-    const chatRooms = await chatService.getChatRooms(req.user.userId, validatedData as any);
+    const chatRooms = await chatService.getChatRooms(req.user.id, validatedData as any);
     
     res.status(200).json({ 
       success: true, 
@@ -256,7 +256,7 @@ export const getChatStats = async (req: AuthenticatedRequest, res: Response): Pr
       end: validatedData.end || new Date()
     };
 
-    const stats = await chatService.getChatStats(req.user.userId, period);
+    const stats = await chatService.getChatStats(req.user.id, period);
     
     res.status(200).json({ 
       success: true, 
@@ -298,7 +298,7 @@ export const closeChatRoom = async (req: AuthenticatedRequest, res: Response): P
       return;
     }
 
-    await chatService.closeChatRoom(orderId, req.user.userId);
+    await chatService.closeChatRoom(orderId, req.user.id);
     
     res.status(200).json({ 
       success: true, 

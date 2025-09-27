@@ -51,7 +51,7 @@ export const uploadFile = async (req: AuthenticatedRequest, res: Response): Prom
     const uploadRequest = {
       file: req.file,
       folder: validatedData.folder,
-      userId: req.user.userId,
+      userId: req.user.id,
       metadata: validatedData.metadata || {}
     };
 
@@ -94,7 +94,7 @@ export const generatePresignedUrl = async (req: AuthenticatedRequest, res: Respo
       fileName: validatedData.fileName,
       mimeType: validatedData.mimeType,
       folder: validatedData.folder,
-      userId: req.user.userId,
+      userId: req.user.id,
       expiresIn: validatedData.expiresIn,
       metadata: validatedData.metadata || {}
     };
@@ -136,7 +136,7 @@ export const deleteFile = async (req: AuthenticatedRequest, res: Response): Prom
     
     const deleteRequest = {
       key: validatedData.key,
-      userId: req.user.userId
+      userId: req.user.id
     };
 
     await s3Service.deleteFile(deleteRequest);
@@ -174,7 +174,7 @@ export const listFiles = async (req: AuthenticatedRequest, res: Response): Promi
     const validatedData = listFilesSchema.parse(req.query);
     
     const listRequest = {
-      userId: req.user.userId,
+      userId: req.user.id,
       folder: validatedData.folder || undefined,
       prefix: validatedData.prefix || undefined,
       maxKeys: validatedData.maxKeys,
@@ -223,7 +223,7 @@ export const generateImageVariants = async (req: AuthenticatedRequest, res: Resp
       return;
     }
 
-    const variants = await s3Service.generateImageVariants(key, req.user.userId);
+    const variants = await s3Service.generateImageVariants(key, req.user.id);
     
     res.status(200).json({ 
       success: true, 
@@ -265,7 +265,7 @@ export const uploadAvatar = async (req: AuthenticatedRequest, res: Response): Pr
     const uploadRequest = {
       file: req.file,
       folder: UploadFolder.AVATARS,
-      userId: req.user.userId,
+      userId: req.user.id,
       metadata: { type: 'avatar' }
     };
 
@@ -274,7 +274,7 @@ export const uploadAvatar = async (req: AuthenticatedRequest, res: Response): Pr
     // Atualizar avatar do usuário
     const { prisma } = await import('../config/database');
     await prisma.user.update({
-      where: { id: req.user.userId },
+      where: { id: req.user.id },
       data: { avatar: result.url }
     });
     
@@ -321,7 +321,7 @@ export const uploadProductImage = async (req: AuthenticatedRequest, res: Respons
     const product = await prisma.product.findFirst({
       where: { 
         id: productId,
-        store: { ownerId: req.user.userId }
+        store: { ownerId: req.user.id }
       }
     });
 
@@ -336,7 +336,7 @@ export const uploadProductImage = async (req: AuthenticatedRequest, res: Respons
     const uploadRequest = {
       file: req.file,
       folder: UploadFolder.PRODUCTS,
-      userId: req.user.userId,
+      userId: req.user.id,
       metadata: { 
         type: 'product',
         productId,

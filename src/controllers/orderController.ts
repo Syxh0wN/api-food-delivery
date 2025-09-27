@@ -30,7 +30,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     const validatedData = createOrderSchema.parse(req.body);
-    const newOrder = await orderService.createOrder(req.user.userId, validatedData);
+    const newOrder = await orderService.createOrder(req.user.id, validatedData);
     
     res.status(201).json({ 
       success: true, 
@@ -66,7 +66,7 @@ export const getUserOrders = async (req: AuthenticatedRequest, res: Response): P
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     
-    const result = await orderService.getUserOrders(req.user.userId, page, limit);
+    const result = await orderService.getUserOrders(req.user.id, page, limit);
     
     res.status(200).json({ 
       success: true, 
@@ -97,7 +97,7 @@ export const getStoreOrders = async (req: AuthenticatedRequest, res: Response): 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     
-    const result = await orderService.getStoreOrders(storeId, req.user.userId, page, limit);
+    const result = await orderService.getStoreOrders(storeId, req.user.id, page, limit);
     
     res.status(200).json({ 
       success: true, 
@@ -125,7 +125,7 @@ export const getOrderById = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    const order = await orderService.getOrderById(id, req.user.userId);
+    const order = await orderService.getOrderById(id, req.user.id);
     
     res.status(200).json({ 
       success: true, 
@@ -154,7 +154,7 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
     }
 
     const validatedData = updateOrderStatusSchema.parse(req.body);
-    const updatedOrder = await orderService.updateOrderStatus(id, storeId, req.user.userId, validatedData);
+    const updatedOrder = await orderService.updateOrderStatus(id, storeId, req.user.id, validatedData);
     
     res.status(200).json({ 
       success: true, 
@@ -193,7 +193,7 @@ export const cancelOrder = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    const cancelledOrder = await orderService.cancelOrder(id, req.user.userId);
+    const cancelledOrder = await orderService.cancelOrder(id, req.user.id);
     
     res.status(200).json({ 
       success: true, 
@@ -221,7 +221,7 @@ export const getOrderSummary = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    const summary = await orderService.getOrderSummary(storeId, req.user.userId);
+    const summary = await orderService.getOrderSummary(storeId, req.user.id);
     
     res.status(200).json({ 
       success: true, 

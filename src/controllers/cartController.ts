@@ -24,7 +24,7 @@ export const getCart = async (req: AuthenticatedRequest, res: Response): Promise
       return;
     }
 
-    const cart = await cartService.getOrCreateCart(req.user.userId);
+    const cart = await cartService.getOrCreateCart(req.user.id);
     
     res.status(200).json({
       success: true,
@@ -51,7 +51,7 @@ export const addToCart = async (req: AuthenticatedRequest, res: Response): Promi
     }
 
     const validatedData = addToCartSchema.parse(req.body);
-    const cartItem = await cartService.addToCart(req.user.userId, validatedData);
+    const cartItem = await cartService.addToCart(req.user.id, validatedData);
     
     res.status(201).json({
       success: true,
@@ -97,7 +97,7 @@ export const updateCartItem = async (req: AuthenticatedRequest, res: Response): 
     }
 
     const validatedData = updateCartItemSchema.parse(req.body);
-    const cartItem = await cartService.updateCartItem(req.user.userId, itemId, validatedData);
+    const cartItem = await cartService.updateCartItem(req.user.id, itemId, validatedData);
     
     res.status(200).json({
       success: true,
@@ -142,7 +142,7 @@ export const removeFromCart = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
-    await cartService.removeFromCart(req.user.userId, itemId);
+    await cartService.removeFromCart(req.user.id, itemId);
     
     res.status(200).json({
       success: true,
@@ -166,7 +166,7 @@ export const clearCart = async (req: AuthenticatedRequest, res: Response): Promi
       return;
     }
 
-    await cartService.clearCart(req.user.userId);
+    await cartService.clearCart(req.user.id);
     
     res.status(200).json({
       success: true,
@@ -191,7 +191,7 @@ export const getCartSummary = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
-    const summary = await cartService.getCartSummary(req.user.userId);
+    const summary = await cartService.getCartSummary(req.user.id);
     
     res.status(200).json({
       success: true,

@@ -150,7 +150,7 @@ export const updateNotificationPreferences = async (req: AuthenticatedRequest, r
 
     const validatedData = updatePreferencesSchema.parse(req.body);
     const preferences = await notificationService.updateUserPreferences(
-      req.user.userId,
+      req.user.id,
       validatedData as any
     );
     
@@ -189,7 +189,7 @@ export const updateFCMToken = async (req: AuthenticatedRequest, res: Response): 
     
     const { prisma } = await import('../config/database');
     await prisma.user.update({
-      where: { id: req.user.userId },
+      where: { id: req.user.id },
       data: { fcmToken: validatedData.fcmToken }
     });
     
@@ -224,7 +224,7 @@ export const getNotificationHistory = async (req: AuthenticatedRequest, res: Res
     }
 
     const limit = parseInt(req.query.limit as string) || 50;
-    const history = await notificationService.getNotificationHistory(req.user.userId, limit);
+    const history = await notificationService.getNotificationHistory(req.user.id, limit);
     
     res.status(200).json({ 
       success: true, 
@@ -247,13 +247,13 @@ export const getNotificationPreferences = async (req: AuthenticatedRequest, res:
 
     const { prisma } = await import('../config/database');
     let preferences = await prisma.notificationPreferences.findUnique({
-      where: { userId: req.user.userId }
+      where: { userId: req.user.id }
     });
 
     if (!preferences) {
       preferences = await prisma.notificationPreferences.create({
         data: {
-          userId: req.user.userId,
+          userId: req.user.id,
           pushEnabled: true,
           emailEnabled: true,
           smsEnabled: false,

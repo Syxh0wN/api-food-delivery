@@ -284,7 +284,7 @@ export const getStoreCoupons = async (req: AuthenticatedRequest, res: Response):
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     
-    const result = await couponService.getStoreCoupons(storeId, req.user.userId, page, limit);
+    const result = await couponService.getStoreCoupons(storeId, req.user.id, page, limit);
     
     res.status(200).json({ 
       success: true, 
@@ -313,7 +313,7 @@ export const createStoreCoupon = async (req: AuthenticatedRequest, res: Response
     }
 
     const validatedData = createCouponSchema.parse(req.body);
-    const newCoupon = await couponService.createStoreCoupon(storeId, req.user.userId, validatedData);
+    const newCoupon = await couponService.createStoreCoupon(storeId, req.user.id, validatedData);
     
     res.status(201).json({ 
       success: true, 

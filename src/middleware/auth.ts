@@ -4,7 +4,7 @@ import { prisma } from "../config/database";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    userId: string;
+    id: string;
     email: string;
     role: string;
   };
@@ -36,7 +36,7 @@ export const authenticate = async (
     }
 
     req.user = {
-      userId: user.id,
+      id: user.id,
       email: user.email,
       role: user.role,
     };
