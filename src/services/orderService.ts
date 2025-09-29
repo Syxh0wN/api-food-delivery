@@ -5,6 +5,7 @@ import { sendOrderNotification } from '../controllers/notificationController';
 import { chatService } from './chatService';
 import { HistoryHelper } from '../utils/historyHelper';
 import { getDeliveryService } from './deliveryService';
+import { NotFoundError } from '../middleware/errorHandler';
 
 export class OrderService {
   async createOrder(userId: string, data: CreateOrderInput): Promise<OrderResponse> {
@@ -354,7 +355,7 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new Error('Pedido não encontrado');
+      throw new NotFoundError('Pedido não encontrado');
     }
 
     return {
@@ -388,7 +389,7 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new Error('Pedido não encontrado');
+      throw new NotFoundError('Pedido não encontrado');
     }
 
     const updatedOrder = await prisma.order.update({
@@ -488,12 +489,16 @@ export class OrderService {
   }
 
   async cancelOrder(orderId: string, userId: string): Promise<OrderResponse> {
-    const order = await prisma.order.findFirst({
-      where: { id: orderId, userId: userId }
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
     });
 
     if (!order) {
-      throw new Error('Pedido não encontrado');
+      throw new NotFoundError('Pedido não encontrado');
+    }
+
+    if (order.userId !== userId) {
+      throw new Error('Acesso negado: Você não pode cancelar pedidos de outros usuários');
     }
 
     if (order.status !== 'PENDING') {

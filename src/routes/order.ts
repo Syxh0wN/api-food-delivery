@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { UserRole } from '@prisma/client';
+import { validateBody, validateParams, validateQuery } from '../middleware/validation';
+import { asyncAuthenticatedHandler } from '../middleware/asyncHandler';
 import {
   createOrder,
   getUserOrders,
@@ -10,19 +12,23 @@ import {
   cancelOrder,
   getOrderSummary
 } from '../controllers/orderController';
+import {
+  createOrderSchema,
+  updateOrderStatusSchema,
+  orderIdSchema,
+  storeIdSchema,
+  storeOrderIdSchema,
+  paginationQuerySchema
+} from '../schemas/orderSchemas';
 
 const router = Router();
 
 router.use(authenticate);
 
-router.post('/orders', createOrder);
-router.get('/orders', getUserOrders);
-router.get('/orders/:id', getOrderById);
-router.patch('/orders/:id/cancel', cancelOrder);
+router.post('/', validateBody(createOrderSchema), asyncAuthenticatedHandler(createOrder));
+router.get('/', asyncAuthenticatedHandler(getUserOrders));
+router.get('/:id', asyncAuthenticatedHandler(getOrderById));
+router.patch('/:id/cancel', validateParams(orderIdSchema), asyncAuthenticatedHandler(cancelOrder));
 
-router.use(authorize([UserRole.STORE_OWNER]));
-router.get('/stores/:storeId/orders', getStoreOrders);
-router.patch('/stores/:storeId/orders/:id/status', updateOrderStatus);
-router.get('/stores/:storeId/orders/summary', getOrderSummary);
 
 export default router;

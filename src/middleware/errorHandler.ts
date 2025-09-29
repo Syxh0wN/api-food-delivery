@@ -1,6 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
 export interface ApiResponse {
   success: boolean;
   message: string;
@@ -36,6 +43,11 @@ export const handleZodError = (res: Response, error: z.ZodError): void => {
 export const handleControllerError = (res: Response, error: any, defaultMessage: string = 'Erro interno do servidor'): void => {
   if (error instanceof z.ZodError) {
     handleZodError(res, error);
+    return;
+  }
+  
+  if (error instanceof NotFoundError) {
+    sendNotFound(res, error.message);
     return;
   }
   
