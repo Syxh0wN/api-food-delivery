@@ -18,8 +18,12 @@ import { cacheStoreMiddleware } from '../middleware/cache';
 import { validateBody, validateParams, validateQuery } from '../middleware/validation';
 import { asyncAuthenticatedHandler } from '../middleware/asyncHandler';
 import {
+  createStoreSchema,
+  updateStoreSchema,
+  storeIdSchema
+} from '../schemas/storeSchemas';
+import {
   updateOrderStatusSchema,
-  storeIdSchema,
   storeOrderIdSchema,
   paginationQuerySchema
 } from '../schemas/orderSchemas';
@@ -27,15 +31,15 @@ import {
 const router = Router();
 
 // Rotas públicas
-router.get('/stores', cacheStoreMiddleware, getAllStores);
-router.get('/stores/:id', cacheStoreMiddleware, getStoreById);
+router.get('/stores', cacheStoreMiddleware, asyncAuthenticatedHandler(getAllStores));
+router.get('/stores/:id', validateParams(storeIdSchema), cacheStoreMiddleware, asyncAuthenticatedHandler(getStoreById));
 
 // Rotas para donos de loja
-router.post('/stores', authenticate, authorize(['STORE_OWNER']), createStore);
-router.get('/stores/my', authenticate, authorize(['STORE_OWNER']), getMyStores);
-router.put('/stores/:id', authenticate, authorize(['STORE_OWNER']), updateStore);
-router.delete('/stores/:id', authenticate, authorize(['STORE_OWNER']), deleteStore);
-router.patch('/stores/:id/toggle', authenticate, authorize(['STORE_OWNER']), toggleStoreStatus);
+router.post('/stores', authenticate, authorize(['STORE_OWNER']), validateBody(createStoreSchema), asyncAuthenticatedHandler(createStore));
+router.get('/stores/my', authenticate, authorize(['STORE_OWNER']), asyncAuthenticatedHandler(getMyStores));
+router.put('/stores/:id', authenticate, authorize(['STORE_OWNER']), validateParams(storeIdSchema), validateBody(updateStoreSchema), asyncAuthenticatedHandler(updateStore));
+router.delete('/stores/:id', authenticate, authorize(['STORE_OWNER']), validateParams(storeIdSchema), asyncAuthenticatedHandler(deleteStore));
+router.patch('/stores/:id/toggle', authenticate, authorize(['STORE_OWNER']), validateParams(storeIdSchema), asyncAuthenticatedHandler(toggleStoreStatus));
 
 // Rotas de pedidos para donos de loja
 router.get('/stores/:storeId/orders', authenticate, authorize(['STORE_OWNER']), validateParams(storeIdSchema), asyncAuthenticatedHandler(getStoreOrders));
