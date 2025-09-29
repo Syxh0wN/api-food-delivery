@@ -18,9 +18,9 @@ export const updateFavoriteSchema = z.object({
 
 export const favoriteFilterSchema = z.object({
   type: z.nativeEnum(FavoriteType).optional(),
-  listId: z.string().cuid('ID da lista inválido').optional(),
+  listId: z.string().optional(),
   isActive: z.coerce.boolean().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.string().optional(),
   search: z.string().optional(),
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional()
@@ -44,7 +44,7 @@ export const updateFavoriteListSchema = z.object({
 
 export const favoriteListFilterSchema = z.object({
   isPublic: z.coerce.boolean().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.string().optional(),
   search: z.string().optional(),
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional()

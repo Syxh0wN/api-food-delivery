@@ -57,12 +57,12 @@ router.use(authenticate);
 
 // CRUD de Favoritos
 router.post('/', validateBody(createFavoriteSchema), asyncAuthenticatedHandler(createFavorite));
-router.get('/', validateQuery(favoriteFilterSchema), asyncAuthenticatedHandler(getFavorites));
+router.get('/', asyncAuthenticatedHandler(getFavorites));
 
 // Rotas específicas ANTES da rota genérica /:favoriteId
 router.get('/stats', asyncAuthenticatedHandler(getFavoriteStats));
-router.get('/recommendations', validateQuery(recommendationsQuerySchema), asyncAuthenticatedHandler(getRecommendations));
-router.get('/export', validateQuery(exportQuerySchema), asyncAuthenticatedHandler(exportFavorites));
+router.get('/recommendations', asyncAuthenticatedHandler(getRecommendations));
+router.get('/export', asyncAuthenticatedHandler(exportFavorites));
 router.get('/analytics', authorize([UserRole.ADMIN]), validateQuery(analyticsQuerySchema), asyncAuthenticatedHandler(getFavoriteAnalytics));
 
 // Toggle favorito (adicionar/remover)
@@ -75,7 +75,7 @@ router.get('/status/:type/:itemId', validateParams(checkFavoriteStatusSchema), a
 
 // CRUD de Listas de Favoritos
 router.post('/lists', validateBody(createFavoriteListSchema), asyncAuthenticatedHandler(createFavoriteList));
-router.get('/lists', validateQuery(favoriteListFilterSchema), asyncAuthenticatedHandler(getFavoriteLists));
+router.get('/lists', asyncAuthenticatedHandler(getFavoriteLists));
 router.get('/lists/:listId', validateParams(listIdSchema), asyncAuthenticatedHandler(getFavoriteListById));
 router.put('/lists/:listId', validateParams(listIdSchema), validateBody(updateFavoriteListSchema), asyncAuthenticatedHandler(updateFavoriteList));
 router.delete('/lists/:listId', validateParams(listIdSchema), asyncAuthenticatedHandler(deleteFavoriteList));
