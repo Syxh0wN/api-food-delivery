@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
+import { validateBody, validateParams } from '../middleware/validation';
+import { asyncAuthenticatedHandler } from '../middleware/asyncHandler';
 import {
   getCart,
   addToCart,
@@ -8,6 +10,11 @@ import {
   clearCart,
   getCartSummary
 } from '../controllers/cartController';
+import {
+  addToCartSchema,
+  updateCartItemSchema,
+  itemIdSchema
+} from '../schemas/cartSchemas';
 
 const router = Router();
 
@@ -15,11 +22,11 @@ const router = Router();
 router.use(authenticate);
 
 // Rotas do carrinho
-router.get('/cart', getCart);
-router.post('/cart/items', addToCart);
-router.put('/cart/items/:itemId', updateCartItem);
-router.delete('/cart/items/:itemId', removeFromCart);
-router.delete('/cart', clearCart);
-router.get('/cart/summary', getCartSummary);
+router.get('/', asyncAuthenticatedHandler(getCart));
+router.post('/items', validateBody(addToCartSchema), asyncAuthenticatedHandler(addToCart));
+router.put('/items/:itemId', validateParams(itemIdSchema), validateBody(updateCartItemSchema), asyncAuthenticatedHandler(updateCartItem));
+router.delete('/items/:itemId', validateParams(itemIdSchema), asyncAuthenticatedHandler(removeFromCart));
+router.delete('/', asyncAuthenticatedHandler(clearCart));
+router.get('/summary', asyncAuthenticatedHandler(getCartSummary));
 
 export default router;
