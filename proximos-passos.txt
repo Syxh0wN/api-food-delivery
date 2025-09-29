@@ -58,12 +58,12 @@ REFATORAÇÃO DE CONTROLLERS - ORDEM DE EXECUÇÃO:
    - Testar: src/tests/routes/store.test.ts
    - Commitar mudanças
 
-7. 🔄 PAYMENT CONTROLLER - SEGUINTE
-   - Criar schemas: src/schemas/paymentSchemas.ts
-   - Otimizar: src/controllers/paymentController.ts
-   - Atualizar: src/routes/payment.ts
-   - Testar: src/tests/routes/payment.test.ts
-   - Commitar mudanças
+7. ✅ PAYMENT CONTROLLER - CONCLUÍDO
+   - Criar schemas: src/schemas/paymentSchemas.ts ✅
+   - Otimizar: src/controllers/paymentController.ts ✅
+   - Atualizar: src/routes/payment.ts ✅
+   - Testar: src/tests/payment.test.ts ✅
+   - Commitar mudanças ✅
 
 8. 🔄 REVIEW CONTROLLER - SEGUINTE
    - Criar schemas: src/schemas/reviewSchemas.ts

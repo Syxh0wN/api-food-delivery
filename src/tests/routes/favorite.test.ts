@@ -6,6 +6,7 @@ import { FavoriteType, UserRole, OrderStatus } from '@prisma/client';
 
 describe('Sistema de Favoritos', () => {
   let testUser: any;
+  let testStoreOwner: any;
   let testStore: any;
   let testProduct: any;
   let testOrder: any;
@@ -70,7 +71,7 @@ describe('Sistema de Favoritos', () => {
 
     let existingStoreOwner = await prisma.user.findUnique({ where: { email: 'store-owner-favorites@example.com' } });
     if (!existingStoreOwner) {
-      await prisma.user.create({
+      testStoreOwner = await prisma.user.create({
         data: {
           email: 'store-owner-favorites@example.com',
           password: await hashPassword('password123'),
@@ -79,6 +80,7 @@ describe('Sistema de Favoritos', () => {
         }
       });
     } else {
+      testStoreOwner = existingStoreOwner;
       await prisma.user.update({ where: { id: existingStoreOwner.id }, data: { password: await hashPassword('password123') } });
     }
 
@@ -116,7 +118,7 @@ describe('Sistema de Favoritos', () => {
           deliveryRadius: 5.0,
           estimatedDeliveryTime: 30,
           minimumOrderValue: 10.0,
-          ownerId: (await prisma.user.findUnique({ where: { email: 'store-owner-favorites@example.com' } }))!.id
+          ownerId: testStoreOwner.id
         }
       });
     } else {
@@ -225,8 +227,7 @@ describe('Sistema de Favoritos', () => {
     } catch (error) { console.error('Error deleting test user:', error); }
 
     try {
-      const storeOwner = await prisma.user.findUnique({ where: { email: 'store-owner-favorites@example.com' } });
-      if (storeOwner) await prisma.user.delete({ where: { id: storeOwner.id } });
+      if (testStoreOwner) await prisma.user.delete({ where: { id: testStoreOwner.id } });
     } catch (error) { console.error('Error deleting store owner:', error); }
 
     try {
