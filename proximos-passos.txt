@@ -1,0 +1,175 @@
+PRÓXIMOS PASSOS DO PROJETO MYFOOD API
+==========================================
+
+FUNCIONALIDADES JÁ IMPLEMENTADAS:
+- Autenticação com roles (Cliente, Dono de Loja, Admin)
+- Gestão de lojas e produtos com categorias/variações
+- Carrinho de compras e sistema de pedidos
+- Cupons (loja e aplicativo) e promoções
+- Pagamentos (PIX, cartão, dinheiro)
+- Notificações push/email/SMS
+- Upload de imagens (AWS S3)
+- Chat em tempo real (Socket.IO)
+- Sistema de avaliações e reviews
+- Validação Zod
+- AuthController otimizado (sem try/catch, com middlewares)
+
+REFATORAÇÃO DE CONTROLLERS - ORDEM DE EXECUÇÃO:
+==============================================
+
+1. ✅ AUTHCONTROLLER - CONCLUÍDO
+   - Middlewares criados: errorHandler, validation, asyncHandler
+   - Schemas separados em arquivo próprio
+   - Zero try/catch, código limpo
+   - Todos os testes passando
+
+2. 🔄 USERCONTROLLER - PRÓXIMO
+   - Criar schemas: src/schemas/userSchemas.ts
+   - Otimizar: src/controllers/userController.ts
+   - Atualizar: src/routes/user.ts
+   - Testar: src/tests/routes/user.test.ts
+   - Commitar mudanças
+
+3. 🔄 PRODUCTCONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/productSchemas.ts
+   - Otimizar: src/controllers/productController.ts
+   - Atualizar: src/routes/product.ts
+   - Testar: src/tests/routes/product.test.ts
+   - Commitar mudanças
+
+4. 🔄 CART CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/cartSchemas.ts
+   - Otimizar: src/controllers/cartController.ts
+   - Atualizar: src/routes/cart.ts
+   - Testar: src/tests/routes/cart.test.ts
+   - Commitar mudanças
+
+5. 🔄 ORDER CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/orderSchemas.ts
+   - Otimizar: src/controllers/orderController.ts
+   - Atualizar: src/routes/order.ts
+   - Testar: src/tests/routes/order.test.ts
+   - Commitar mudanças
+
+6. 🔄 STORE CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/storeSchemas.ts
+   - Otimizar: src/controllers/storeController.ts
+   - Atualizar: src/routes/store.ts
+   - Testar: src/tests/routes/store.test.ts
+   - Commitar mudanças
+
+7. 🔄 PAYMENT CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/paymentSchemas.ts
+   - Otimizar: src/controllers/paymentController.ts
+   - Atualizar: src/routes/payment.ts
+   - Testar: src/tests/routes/payment.test.ts
+   - Commitar mudanças
+
+8. 🔄 REVIEW CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/reviewSchemas.ts
+   - Otimizar: src/controllers/reviewController.ts
+   - Atualizar: src/routes/review.ts
+   - Testar: src/tests/routes/review.test.ts
+   - Commitar mudanças
+
+9. 🔄 COUPON CONTROLLER - SEGUINTE
+   - Criar schemas: src/schemas/couponSchemas.ts
+   - Otimizar: src/controllers/couponController.ts
+   - Atualizar: src/routes/coupon.ts
+   - Testar: src/tests/routes/coupon.test.ts
+   - Commitar mudanças
+
+10. 🔄 DELIVERY CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/deliverySchemas.ts
+    - Otimizar: src/controllers/deliveryController.ts
+    - Atualizar: src/routes/delivery.ts
+    - Testar: src/tests/routes/delivery.test.ts
+    - Commitar mudanças
+
+11. 🔄 NOTIFICATION CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/notificationSchemas.ts
+    - Otimizar: src/controllers/notificationController.ts
+    - Atualizar: src/routes/notification.ts
+    - Testar: src/tests/routes/notification.test.ts
+    - Commitar mudanças
+
+12. 🔄 CHAT CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/chatSchemas.ts
+    - Otimizar: src/controllers/chatController.ts
+    - Atualizar: src/routes/chat.ts
+    - Testar: src/tests/routes/chat.test.ts
+    - Commitar mudanças
+
+13. 🔄 UPLOAD CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/uploadSchemas.ts
+    - Otimizar: src/controllers/uploadController.ts
+    - Atualizar: src/routes/upload.ts
+    - Testar: src/tests/routes/upload.test.ts
+    - Commitar mudanças
+
+14. 🔄 FAVORITE CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/favoriteSchemas.ts
+    - Otimizar: src/controllers/favoriteController.ts
+    - Atualizar: src/routes/favorite.ts
+    - Testar: src/tests/routes/favorite.test.ts
+    - Commitar mudanças
+
+15. 🔄 HISTORY CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/historySchemas.ts
+    - Otimizar: src/controllers/historyController.ts
+    - Atualizar: src/routes/history.ts
+    - Testar: src/tests/routes/history.test.ts
+    - Commitar mudanças
+
+16. 🔄 REPORT CONTROLLER - SEGUINTE
+    - Criar schemas: src/schemas/reportSchemas.ts
+    - Otimizar: src/controllers/reportController.ts
+    - Atualizar: src/routes/report.ts
+    - Testar: src/tests/routes/report.test.ts
+    - Commitar mudanças
+
+PADRÃO DE REFATORAÇÃO PARA CADA CONTROLLER:
+===========================================
+
+1. CRIAR SCHEMAS (src/schemas/[nome]Schemas.ts)
+   - Mover validações Zod do controller
+   - Definir tipos TypeScript
+   - Exportar schemas e tipos
+
+2. OTIMIZAR CONTROLLER (src/controllers/[nome]Controller.ts)
+   - Remover imports desnecessários (z, try/catch)
+   - Remover todos os try/catch
+   - Usar sendSuccess e sendError
+   - Simplificar lógica de negócio
+
+3. ATUALIZAR ROTAS (src/routes/[nome].ts)
+   - Adicionar validateBody/validateParams/validateQuery
+   - Adicionar asyncHandler/asyncAuthenticatedHandler
+   - Importar schemas necessários
+
+4. TESTAR
+   - Executar testes específicos do controller
+   - Verificar se todos passam
+   - Corrigir problemas se houver
+
+5. COMMITAR
+   - git add .
+   - git commit -m "refactor: otimizar [nome]Controller..."
+   - git push
+
+BENEFÍCIOS ESPERADOS:
+- Redução de ~60% no código dos controllers
+- Eliminação completa de try/catch
+- Código mais limpo e legível
+- Tratamento de erro centralizado
+- Validação padronizada
+- Melhor manutenibilidade
+
+NOTAS TÉCNICAS:
+- Sempre testar antes de commitar
+- Não executar todos os testes juntos (vai dar erro)
+- Usar middlewares já criados: errorHandler, validation, asyncHandler
+- Manter padrão de resposta consistente
+- Seguir ordem da lista rigorosamente
+
+ÚLTIMA ATUALIZAÇÃO: AuthController otimizado - 70% menos código, zero try/catch
