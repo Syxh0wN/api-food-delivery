@@ -20,12 +20,17 @@ export const sendError = (res: Response, message: string, statusCode: number = 4
   res.status(statusCode).json(response);
 };
 
+export const sendNotFound = (res: Response, message: string): void => {
+  const response: ApiResponse = { success: false, message };
+  res.status(404).json(response);
+};
+
 export const handleZodError = (res: Response, error: z.ZodError): void => {
   const errors = error.issues.map((err) => ({
     field: err.path.join('.'),
     message: err.message
   }));
-  sendError(res, 'Dados inválidos', 400, errors);
+  sendError(res, 'Erro de validação', 400, errors);
 };
 
 export const handleControllerError = (res: Response, error: any, defaultMessage: string = 'Erro interno do servidor'): void => {

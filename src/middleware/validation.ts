@@ -13,7 +13,7 @@ export const validateBody = (schema: z.ZodSchema) => {
           field: err.path.join('.'),
           message: err.message
         }));
-        sendError(res, 'Dados inválidos', 400, errors);
+               sendError(res, 'Erro de validação', 400, errors);
         return;
       }
       next(error);
@@ -33,7 +33,7 @@ export const validateParams = (schema: z.ZodSchema) => {
           field: err.path.join('.'),
           message: err.message
         }));
-        sendError(res, 'Parâmetros inválidos', 400, errors);
+               sendError(res, 'Erro de validação', 400, errors);
         return;
       }
       next(error);
@@ -53,7 +53,7 @@ export const validateQuery = (schema: z.ZodSchema) => {
           field: err.path.join('.'),
           message: err.message
         }));
-        sendError(res, 'Query parameters inválidos', 400, errors);
+               sendError(res, 'Erro de validação', 400, errors);
         return;
       }
       next(error);
