@@ -1,83 +1,36 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { z } from 'zod';
+import { sendSuccess, handleControllerError } from '../middleware/errorHandler';
+import { registerSchema, loginSchema, RegisterInput, LoginInput } from '../schemas/authSchemas';
 
 const authService = new AuthService();
-
-const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  phone: z.string().optional(),
-  role: z.enum(['CLIENT', 'STORE_OWNER']).optional().default('CLIENT')
-});
-
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Senha é obrigatória')
-});
 
 export class AuthController {
   async register(req: Request, res: Response): Promise<void> {
     try {
-      const validatedData = registerSchema.parse(req.body);
-      
+      const validatedData = req.body as RegisterInput;
       const result = await authService.register(validatedData);
-      
-      res.status(201).json({
-        success: true,
-        message: 'Usuário criado com sucesso',
-        data: result
-      });
+      sendSuccess(res, 'Usuário criado com sucesso', result, 201);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
-          success: false,
-          message: 'Dados inválidos',
-          errors: error.issues.map((err: any) => ({
-            field: err.path.join('.'),
-            message: err.message
-          }))
-        });
-        return;
-      }
-
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Erro interno do servidor'
-      });
+      handleControllerError(res, error);
     }
   }
 
   async login(req: Request, res: Response): Promise<void> {
     try {
-      const validatedData = loginSchema.parse(req.body);
-      
+      const validatedData = req.body as LoginInput;
       const result = await authService.login(validatedData);
-      
-      res.json({
-        success: true,
-        message: 'Login realizado com sucesso',
-        data: result
-      });
+      sendSuccess(res, 'Login realizado com sucesso', result);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
+      if (error instanceof Error && error.message.includes('Credenciais inválidas')) {
+        res.status(401).json({
           success: false,
-          message: 'Dados inválidos',
-          errors: error.issues.map((err: any) => ({
-            field: err.path.join('.'),
-            message: err.message
-          }))
+          message: error.message
         });
         return;
       }
-
-      res.status(401).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Erro interno do servidor'
-      });
+      handleControllerError(res, error, 'Erro no login');
     }
   }
 
@@ -91,25 +44,14 @@ export class AuthController {
         return;
       }
 
-        const profile = await authService.getProfile(req.user.id);
-      
-      res.json({
-        success: true,
-        message: 'Perfil obtido com sucesso',
-        data: profile
-      });
+      const profile = await authService.getProfile(req.user.id);
+      sendSuccess(res, 'Perfil obtido com sucesso', profile);
     } catch (error) {
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Erro interno do servidor'
-      });
+      handleControllerError(res, error);
     }
   }
 
   async logout(req: AuthenticatedRequest, res: Response): Promise<void> {
-    res.json({
-      success: true,
-      message: 'Logout realizado com sucesso'
-    });
+    sendSuccess(res, 'Logout realizado com sucesso');
   }
 }
